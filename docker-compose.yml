@@ -1,0 +1,46 @@
+
+services:
+  frontend:
+    container_name: front-app
+    build:
+      context: "."
+      dockerfile: ./container/Dockerfile.frontend
+    volumes:
+      - ./frontend:/usr/src/frontend
+      - node_modules:/usr/src/frontend/node_modules
+    ports:
+      - "3000:3000"
+    tty: true
+    depends_on:
+      - backend
+
+  backend:
+    container_name: back-app
+    build:
+      context: "."
+      dockerfile: ./container/Dockerfile.backend
+    volumes:
+      - ./backend:/usr/src/backend
+    ports:
+      - "8080:8080"
+    tty: true
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:14
+    container_name: postgres_pta
+    ports:
+      - 5432:5432
+    volumes:
+      - db-store:/var/lib/postgresql/data
+    env_file:
+      - ./backend/.env
+    # environment:
+    #   POSTGRES_USER: ${POSTGRES_USER}
+    #   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    #   POSTGRES_DB: ${POSTGRES_DB}
+
+volumes:
+  db-store:
+  node_modules:

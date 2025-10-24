@@ -1,0 +1,11 @@
+FROM node:22-bookworm
+
+WORKDIR /usr/src/frontend
+
+COPY ./frontend/package*.json ./
+
+RUN npm install
+
+CMD ["npm", "run", "dev"]
+
+EXPOSE 3000
