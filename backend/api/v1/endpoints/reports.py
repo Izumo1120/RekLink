@@ -50,7 +50,7 @@ async def create_report(
 
     # TODO: 教師への通知処理を非同期タスクとして実行する
 
-    return new_report_record
+    return dict(new_report_record)
 
 
 @router.get(
@@ -65,11 +65,12 @@ async def read_my_reports(
     """
     自身が過去に投稿した指摘の一覧を取得します。（要認証）
     """
-    my_reports = await conn.fetch(
+    my_reports_records = await conn.fetch(
         "SELECT * FROM reports WHERE reporter_id = $1 ORDER BY created_at DESC",
         current_user.id
     )
-    return my_reports
+    
+    return [dict(r) for r in my_reports_records]
 
 
 # ---------------------------------------------------------------------------
@@ -89,15 +90,13 @@ async def get_reports(
     """
     自身が管理するチームの生徒から投稿された、未対応の指摘・フィードバック一覧を取得します。（教師権限が必要）
     """
-    # 教師が管理するチームのID一覧を取得
     team_ids = await conn.fetchval(
         "SELECT array_agg(id) FROM teams WHERE created_by = $1", current_teacher.id
     )
     if not team_ids:
-        return [] # 管理するチームがなければ空のリストを返す
+        return []
 
-    # 管理するチームの生徒からの指摘を、投稿者名やコンテンツタイトルと結合して取得
-    reports = await conn.fetch(
+    report_records = await conn.fetch(
         """
         SELECT
             r.*,
@@ -112,7 +111,8 @@ async def get_reports(
         """,
         team_ids
     )
-    return reports
+    
+    return [dict(r) for r in report_records]
 
 
 @router.put(
@@ -130,15 +130,16 @@ async def resolve_report(
     指摘の対応状況（例: 'resolved'）を更新します。（教師権限が必要）
     ※教師は自身が管理するチームの生徒からの指摘のみ更新可能
     """
-    # 更新対象の指摘が存在し、かつ教師が管理するチームの生徒からのものであるか検証
-    target_report = await conn.fetchrow(
+    
+    # ★★★ 修正 ★★★: $1 を $1::VARCHAR にキャストして型を明示
+    target_report_record = await conn.fetchrow(
         """
         UPDATE reports r
         SET
-            status = $1,
+            status = $1::VARCHAR,
             resolution_note = $2,
             resolved_by = $3,
-            resolved_at = CASE WHEN $1 = 'resolved' OR $1 = 'rejected' THEN NOW() ELSE NULL END
+            resolved_at = CASE WHEN $1::VARCHAR = 'resolved' OR $1::VARCHAR = 'rejected' THEN NOW() ELSE NULL END
         FROM users u, team_members tm, teams t
         WHERE r.id = $4
           AND r.reporter_id = u.id
@@ -153,13 +154,13 @@ async def resolve_report(
         report_id
     )
 
-    if not target_report:
+    if not target_report_record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Report not found or you do not have permission to update it"
         )
     
-    return target_report
+    return dict(target_report_record)
 
 
 @router.get(
@@ -176,8 +177,7 @@ async def get_content_for_report(
     指摘対象となったコンテンツの詳細内容を取得します。（教師権限が必要）
     ※コンテンツ修正UIでの表示用
     """
-    # 指摘が存在し、かつ教師が管理するチームの生徒からのものであるか検証
-    content = await conn.fetchrow(
+    content_record = await conn.fetchrow(
         """
         SELECT c.id, c.content_type, c.title, c.content, c.explanation
         FROM contents c
@@ -190,15 +190,13 @@ async def get_content_for_report(
         report_id, current_teacher.id
     )
 
-    if not content:
+    if not content_record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Content not found or you do not have permission to view it"
         )
     
-    # TODO: クイズの場合は選択肢も取得してレスポンスに含める
-    
-    return content
+    return dict(content_record)
 
 
 @router.delete(
@@ -215,7 +213,6 @@ async def delete_report(
     指摘を削除します。（教師権限が必要）
     ※教師は自身が管理するチームの生徒からの指摘のみ削除可能
     """
-    # 削除対象の指摘が存在し、かつ教師が管理するチームの生徒からのものであるか検証
     result = await conn.execute(
         """
         DELETE FROM reports r

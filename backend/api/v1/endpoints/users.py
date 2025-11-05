@@ -17,11 +17,13 @@ async def read_my_posts(
     """
     自身が作成したコンテンツ（クイズと豆知識）の一覧を取得します。（要認証）
     """
-    posts = await conn.fetch(
+    posts_records = await conn.fetch(
         "SELECT id, content_type, title, created_at FROM contents WHERE author_id = $1 ORDER BY created_at DESC",
         current_user.id
     )
-    return posts
+    
+    # ★★★ 修正 ★★★: Recordのリストをdictのリストに変換
+    return [dict(p) for p in posts_records]
 
 
 @router.get("/me/answers", response_model=List[content_schema.UserAnswer], summary="自身の解答履歴を取得する")
@@ -42,7 +44,9 @@ async def read_my_answers(
         """,
         current_user.id
     )
-    return answer_records
+    
+    # ★★★ 修正 ★★★: Recordのリストをdictのリストに変換
+    return [dict(r) for r in answer_records]
 
 
 @router.get("/me/likes", response_model=List[content_schema.ContentInfo], summary="「いいね」したコンテンツ一覧を取得する")
@@ -53,7 +57,7 @@ async def read_my_liked_contents(
     """
     自身が「いいね」したコンテンツの一覧を取得します。（要認証）
     """
-    liked_contents = await conn.fetch(
+    liked_records = await conn.fetch(
         """
         SELECT c.id, c.content_type, c.title, c.created_at FROM contents c
         JOIN interactions i ON c.id = i.content_id
@@ -62,7 +66,9 @@ async def read_my_liked_contents(
         """,
         current_user.id
     )
-    return liked_contents
+    
+    # ★★★ 修正 ★★★: Recordのリストをdictのリストに変換
+    return [dict(c) for c in liked_records]
 
 
 @router.get("/me/bookmarks", response_model=List[content_schema.ContentInfo], summary="保存したコンテンツ一覧を取得する")
@@ -73,7 +79,7 @@ async def read_my_saved_contents(
     """
     自身が保存（ブックマーク）したコンテンツの一覧を取得します。（要認証）
     """
-    saved_contents = await conn.fetch(
+    saved_records = await conn.fetch(
         """
         SELECT c.id, c.content_type, c.title, c.created_at FROM contents c
         JOIN interactions i ON c.id = i.content_id
@@ -82,7 +88,9 @@ async def read_my_saved_contents(
         """,
         current_user.id
     )
-    return saved_contents
+    
+    # ★★★ 修正 ★★★: Recordのリストをdictのリストに変換
+    return [dict(c) for c in saved_records]
 
 
 @router.get("/me/statistics", response_model=user_schema.UserStats, summary="自身の学習統計を取得する")
@@ -113,3 +121,4 @@ async def read_my_stats(
         "accuracy": accuracy,
         "posts_created": posts_created,
     }
+

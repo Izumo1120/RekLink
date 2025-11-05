@@ -1,0 +1,187 @@
+/* --- 仕様書に基づくカラーパレット --- */
+:root {
+  --main-color: #2E7D32;
+  --base-color: #F8F9FA;
+  --text-color: #343A40;
+  --accent-color: #D7CCC8;
+  --error-color: #E53E3E;
+}
+
+.loginPageWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--base-color);
+  padding: 1rem;
+}
+
+.loginContainer {
+  width: 100%;
+  max-width: 450px;
+  /* PC・タブレットでの最大幅 */
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+/* --- カードヘッダー（巻物風デザインと「戻る」ボタン） --- */
+.cardHeader {
+  /* 巻物風の上部テクスチャをグラデーションで表現 */
+  background: linear-gradient(180deg, rgba(215, 204, 200, 0.2) 0%, rgba(215, 204, 200, 0.0) 100%), #fff;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  min-height: 60px;
+  /* ボタンの高さを確保 */
+  display: flex;
+  align-items: center;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--main-color);
+  font-weight: 500;
+  padding: 0.5rem;
+  margin-left: -0.5rem;
+  /* 左寄せ */
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: #e8f5e9;
+  /* 薄い緑 */
+}
+
+/* --- フォーム本体 --- */
+.loginForm {
+  padding: 1.5rem 2.5rem 2.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.formTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: var(--main-color);
+}
+
+.formTitle img {
+  width: 24px;
+  height: 24px;
+}
+
+.formTitle h2 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.formGroup {
+  margin-bottom: 1.25rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: var(--main-color);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.submitButton {
+  padding: 0.9rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: var(--main-color);
+  color: white;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.submitButton:hover {
+  background-color: #1b5e20;
+  /* より濃い緑 */
+}
+
+.submitButton:disabled {
+  background-color: #9e9e9e;
+  cursor: not-allowed;
+}
+
+.errorMessage {
+  color: var(--error-color);
+  background-color: rgba(229, 62, 62, 0.1);
+  border: 1px solid var(--error-color);
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.signupLink {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #616161;
+}
+
+.signupLink a {
+  color: var(--main-color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.signupLink a:hover {
+  text-decoration: underline;
+}
+
+/* --- レスポンシブ対応 --- */
+
+/* スマホ (デザイン画像に合わせる) */
+@media (max-width: 600px) {
+  .loginPageWrapper {
+    padding: 0;
+    /* スマホでは画面全体に広げる */
+    align-items: flex-start;
+  }
+
+  .loginContainer {
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    min-height: 100vh;
+  }
+
+  .loginForm {
+    padding: 1.5rem;
+  }
+}

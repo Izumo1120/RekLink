@@ -1,0 +1,160 @@
+/* --- 共通 --- */
+.loadingScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: #666;
+  background-color: #F8F9FA;
+  /* ベースカラー */
+}
+
+/* --- チーム参加モーダル --- */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* 半透明の黒背景 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 1000;
+  /* 他の要素より手前に表示 */
+}
+
+.modalContent {
+  background-color: white;
+  padding: 2rem 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+}
+
+.modalContent h2 {
+  margin-top: 0;
+  color: #2E7D32;
+  /* メイン（緑） */
+}
+
+.modalContent p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #343A40;
+  /* テキスト（ダークグレー） */
+  margin-bottom: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.25rem;
+  text-align: left;
+  /* ラベルを左揃えに */
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #2E7D32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.submitButton {
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #2E7D32;
+  color: white;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.submitButton:disabled {
+  background-color: #9e9e9e;
+}
+
+.errorMessage {
+  color: #E53E3E;
+  /* エラー（赤） */
+  background-color: rgba(229, 62, 62, 0.1);
+  border: 1px solid #E53E3E;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+
+/* --- ホーム（フィード）画面 --- */
+.homeContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.header {
+  padding: 1rem 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 1.5rem;
+}
+
+.header h1 {
+  margin: 0;
+  color: #2E7D32;
+}
+
+.feedList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* クイズカードのダミースタイル */
+.quizCardDummy {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.quizCardDummy:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.quizCardDummy h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.quizCardDummy p {
+  color: #777;
+  font-size: 0.9rem;
+  margin: 0;
+}

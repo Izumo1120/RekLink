@@ -40,8 +40,10 @@ async def _verify_team_owner(
     """
     教師がそのチームの所有者であることを確認する
     """
+    # ★★★ 修正 ★★★: 'SELECT id, created_by' から 'SELECT *' に変更
+    # これにより、id, created_by だけでなく、name, join_code なども取得される
     team = await conn.fetchrow(
-        "SELECT id, created_by FROM teams WHERE id = $1", team_id
+        "SELECT * FROM teams WHERE id = $1", team_id
     )
     if not team:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
@@ -71,7 +73,6 @@ async def join_team(
     参加コードを使用してチームに参加します。（要認証）
     """
     if current_user.role != 'student':
-         # ★★★ エラー箇所を修正: 4.HTTP_403_FORBIDDEN -> status.HTTP_403_FORBIDDEN
          raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only students can join teams")
 
     existing_membership = await conn.fetchrow(
@@ -91,7 +92,9 @@ async def join_team(
         target_team['id'], current_user.id
     )
 
-    return target_team
+    # ★★★ 修正 ★★★
+    # asyncpg.Record を dict に変換
+    return dict(target_team)
 
 
 @router.get(
@@ -118,7 +121,9 @@ async def get_my_team(
     if not my_team:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User is not part of any active team")
 
-    return my_team
+    # ★★★ 修正 ★★★
+    # asyncpg.Record を dict に変換
+    return dict(my_team)
 
 
 # ---------------------------------------------------------------------------
@@ -139,7 +144,6 @@ async def create_team(
     """
     新しいチーム（クラス）を作成します。作成時に一意の参加コードが自動生成されます。（教師権限が必要）
     """
-    # TODO: 参加コードが重複しないことを保証するロジック（リトライなど）
     join_code = _generate_join_code()
 
     new_team_record = await conn.fetchrow(
@@ -150,7 +154,10 @@ async def create_team(
         """,
         team_in.name, join_code, current_teacher.id
     )
-    return new_team_record
+    
+    # ★★★ 修正 ★★★
+    # asyncpg.Record を dict に変換
+    return dict(new_team_record)
 
 
 @router.get(
@@ -165,11 +172,14 @@ async def get_my_teams(
     """
     自身が作成したチームの一覧を取得します。（教師権限が必要）
     """
-    teams = await conn.fetch(
+    teams_records = await conn.fetch(
         "SELECT * FROM teams WHERE created_by = $1 AND is_active = TRUE ORDER BY created_at DESC",
         current_teacher.id
     )
-    return teams
+    
+    # ★★★ 修正 ★★★
+    # Recordのリストをdictのリストに変換
+    return [dict(team) for team in teams_records]
 
 
 @router.get(
@@ -185,9 +195,11 @@ async def get_team_details(
     """
     自身が管理する特定のチームの詳細情報を、所属する生徒一覧と共に取得します。（教師権限が必要）
     """
-    team = await _verify_team_owner(team_id, conn, current_teacher)
+    # _verify_team_owner が完全なチーム情報を返すようになったため、
+    # team_record には name や join_code も含まれている
+    team_record = await _verify_team_owner(team_id, conn, current_teacher)
 
-    students = await conn.fetch(
+    student_records = await conn.fetch(
         """
         SELECT u.id as user_id, u.nickname, u.email, tm.joined_at
         FROM users u
@@ -197,7 +209,9 @@ async def get_team_details(
         """,
         team_id
     )
-    return {**team, "students": students}
+    
+    # Record と Recordのリストを dict に変換
+    return {**dict(team_record), "students": [dict(s) for s in student_records]}
 
 
 @router.get(
@@ -215,7 +229,7 @@ async def get_team_students(
     """
     await _verify_team_owner(team_id, conn, current_teacher)
 
-    students = await conn.fetch(
+    student_records = await conn.fetch(
         """
         SELECT u.id as user_id, u.nickname, u.email, tm.joined_at
         FROM users u
@@ -225,7 +239,10 @@ async def get_team_students(
         """,
         team_id
     )
-    return students
+    
+    # ★★★ 修正 ★★★
+    # Recordのリストをdictのリストに変換
+    return [dict(s) for s in student_records]
 
 
 @router.post(
@@ -244,7 +261,7 @@ async def regenerate_join_code(
     await _verify_team_owner(team_id, conn, current_teacher)
 
     new_join_code = _generate_join_code()
-    updated_team = await conn.fetchrow(
+    updated_team_record = await conn.fetchrow(
         """
         UPDATE teams
         SET join_code = $1, updated_at = NOW()
@@ -253,5 +270,8 @@ async def regenerate_join_code(
         """,
         new_join_code, team_id
     )
-    return updated_team
+    
+    # ★★★ 修正 ★★★
+    # asyncpg.Record を dict に変換
+    return dict(updated_team_record)
 

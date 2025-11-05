@@ -1,0 +1,284 @@
+/* --- 仕様書に基づくカラーパレット --- */
+:root {
+  --main-color: #2E7D32; /* メイン（緑） */
+  --accent-color: #D7CCC8; /* アクセント（ベージュ） */
+  --base-color: #F8F9FA; /* ベース（オフホワイト） */
+  --text-color: #343A40; /* テキスト（ダークグレー） */
+}
+
+.landingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--base-color);
+  color: var(--text-color);
+  min-height: 100vh;
+}
+
+/* --- 1. ヘッダーセクション --- */
+.header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  max-width: 1200px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
+}
+.logo img {
+  width: 32px;
+  height: 32px;
+}
+.logo h1 {
+  font-size: 1.5rem;
+  color: var(--main-color);
+  margin: 0;
+}
+
+.navigation {
+  display: flex;
+  gap: 1rem;
+}
+
+.navButtonPrimary,
+.navButtonSecondary {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navButtonPrimary {
+  background-color: var(--main-color);
+  color: white;
+}
+.navButtonPrimary:hover {
+  background-color: #1b5e20; /* より濃い緑 */
+}
+
+.navButtonSecondary {
+  background-color: transparent;
+  color: var(--main-color);
+  border: 2px solid var(--main-color);
+}
+.navButtonSecondary:hover {
+  background-color: #e8f5e9; /* 薄い緑 */
+}
+
+/* --- 2. メインビジュアル & キャッチコピー --- */
+.heroSection {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  padding: 4rem 2rem;
+  align-items: center;
+  gap: 2rem;
+}
+
+.heroText {
+  flex: 1;
+}
+.heroText h2 {
+  font-size: 2.5rem;
+  color: var(--main-color);
+  margin-bottom: 1rem;
+}
+.heroText p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.heroImageContainer {
+  flex: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.heroImage {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* --- 3. 機能紹介カードセクション --- */
+.featuresSection {
+  width: 100%;
+  max-width: 1200px;
+  padding: 2rem;
+  display: grid;
+  /* PCでは4カラム */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+}
+
+.featureCard {
+  background-color: var(--base-color);
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ★★★ ご要望のホバーエフェクト ★★★ */
+.featureCard:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* リンク付きカードのスタイルリセット */
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+.cardIcon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1rem auto;
+  background-color: var(--main-color);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.cardIcon img {
+  width: 32px;
+  height: 32px;
+  /* アイコンが白抜き画像の場合の対策 */
+  filter: brightness(0) invert(1);
+}
+
+.featureCard h3 {
+  color: var(--main-color);
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.featureCard p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* --- 4. 学習の流れセクション --- */
+.howToSection {
+  width: 100%;
+  max-width: 1200px;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+.howToSection h2 {
+  font-size: 2rem;
+  color: var(--main-color);
+  margin-bottom: 3rem;
+}
+
+.stepsContainer {
+  display: flex;
+  justify-content: space-around;
+  gap: 2rem;
+}
+
+.step {
+  flex: 1;
+  max-width: 300px;
+}
+.stepNumber {
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  color: var(--text-color);
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0 auto 1.5rem auto;
+}
+.step h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.step p {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* --- ★★★ レスポンシブ対応 ★★★ --- */
+
+/* タブレット (例: 900px以下) */
+@media (max-width: 900px) {
+  .heroSection {
+    flex-direction: column;
+    padding: 3rem 1.5rem;
+  }
+  .heroText h2 {
+    font-size: 2rem;
+  }
+
+  .featuresSection {
+    /* 2カラムに変更 */
+    grid-template-columns: repeat(2, 1fr);
+    padding: 1.5rem;
+  }
+
+  .stepsContainer {
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+  }
+}
+
+/* スマホ (例: 600px以下) */
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .navigation {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .heroSection {
+    padding: 2rem 1rem;
+  }
+  .heroText {
+    text-align: center;
+  }
+  .heroText h2 {
+    font-size: 1.8rem;
+  }
+  .heroText p {
+    font-size: 1rem;
+  }
+
+  .featuresSection {
+    /* 1カラムに変更 */
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .howToSection {
+    padding: 3rem 1rem;
+  }
+  .howToSection h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+}
+

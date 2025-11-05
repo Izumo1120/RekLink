@@ -40,7 +40,7 @@ async def get_dashboard_summary(
             team_id, current_teacher.id
         )
         if not is_owner:
-            raise HTTPException(status_code=status.HTTP_4_04_NOT_FOUND, detail="Team not found or you are not the owner")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found or you are not the owner")
         student_ids_query += " AND t.id = $2"
         params.append(team_id)
 
@@ -115,7 +115,7 @@ async def get_popular_tags(
             team_id, current_teacher.id
         )
         if not is_owner:
-            raise HTTPException(status_code=status.HTTP_4_04_NOT_FOUND, detail="Team not found or you are not the owner")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found or you are not the owner")
         query += " AND team.id = $2"
         params.append(team_id)
 
@@ -125,5 +125,8 @@ async def get_popular_tags(
         LIMIT 10
     """
     
-    popular_tags = await conn.fetch(query, *params)
-    return popular_tags
+    popular_tags_records = await conn.fetch(query, *params)
+    
+    # ★★★ 修正 ★★★: Recordのリストをdictのリストに変換
+    return [dict(tag) for tag in popular_tags_records]
+

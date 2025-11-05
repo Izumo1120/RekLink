@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.get(
     "/{student_id}",
-    response_model=user_schema.StudentDetails, # この後 schemas/user.py に StudentDetails を追加します
+    response_model=user_schema.StudentDetails,
     summary="【教師用】特定の生徒の詳細情報を取得"
 )
 async def get_student_details(
@@ -34,7 +34,7 @@ async def get_student_details(
     """
 
     # 1. 生徒が存在し、かつ教師の管理するチームに所属しているか検証
-    student_profile = await conn.fetchrow(
+    student_profile_record = await conn.fetchrow(
         """
         SELECT u.* FROM users u
         JOIN team_members tm ON u.id = tm.user_id
@@ -44,7 +44,7 @@ async def get_student_details(
         student_id, current_teacher.id
     )
 
-    if not student_profile:
+    if not student_profile_record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Student not found or you do not have permission to view this student"
@@ -55,9 +55,9 @@ async def get_student_details(
     correct_answers_fut = conn.fetchval("SELECT COUNT(*) FROM user_answers WHERE user_id = $1 AND is_correct = TRUE", student_id)
     posts_created_fut = conn.fetchval("SELECT COUNT(*) FROM contents WHERE author_id = $1", student_id)
 
-    total_answered = await total_answered_fut
-    correct_answers = await correct_answers_fut
-    posts_created = await posts_created_fut
+    total_answered = await total_answered_fut or 0
+    correct_answers = await correct_answers_fut or 0
+    posts_created = await posts_created_fut or 0
 
     accuracy = 0.0
     if total_answered > 0:
@@ -71,13 +71,13 @@ async def get_student_details(
     }
 
     # 3. 投稿履歴を取得 (直近10件)
-    posts = await conn.fetch(
+    post_records = await conn.fetch(
         "SELECT id, content_type, title, created_at FROM contents WHERE author_id = $1 ORDER BY created_at DESC LIMIT 10",
         student_id
     )
 
     # 4. 解答履歴を取得 (直近10件)
-    answers = await conn.fetch(
+    answer_records = await conn.fetch(
         """
         SELECT ua.id, ua.content_id, c.title as quiz_title, ua.selected_option_id, ua.is_correct, ua.answered_at
         FROM user_answers ua
@@ -89,9 +89,11 @@ async def get_student_details(
     )
 
     # 5. すべての情報を結合して返す
+    # ★★★ 修正 ★★★: すべてのRecordとRecordリストをdictに変換
     return {
-        "profile": student_profile,
+        "profile": dict(student_profile_record),
         "stats": stats,
-        "recent_posts": posts,
-        "recent_answers": answers
+        "recent_posts": [dict(p) for p in post_records],
+        "recent_answers": [dict(a) for a in answer_records]
     }
+

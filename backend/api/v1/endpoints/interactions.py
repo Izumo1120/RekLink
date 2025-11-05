@@ -108,3 +108,35 @@ async def unsave_content(
         current_user.id, content_id
     )
     return
+
+@router.post(
+    "/{content_id}/share",
+    summary="コンテンツを共有する",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def share_content(
+    content_id: uuid.UUID,
+    conn: asyncpg.Connection = Depends(deps.get_db),
+    current_user: user_schema.User = Depends(deps.get_current_user)
+):
+    """
+    コンテンツの共有アクションを記録します。（要認証）
+    （将来的に外部SNS連携やスコア計算に利用）
+    """
+    await _check_content_exists(conn, content_id)
+    
+    # 共有は一度きりではなく、実行されるたびに記録する（あるいはユニーク制約で一度にする）
+    # ここでは「いいね」などと仕様を合わせ、ユニーク制約を想定
+    await conn.execute(
+        """
+        INSERT INTO interactions (user_id, content_id, interaction_type)
+        VALUES ($1, $2, 'share')
+        ON CONFLICT (user_id, content_id, interaction_type) DO NOTHING
+        """,
+        current_user.id, content_id
+    )
+    
+    # TODO: 共有処理が重い場合（例: 外部API呼び出し）は、
+    # この処理をバックグラウンドタスク（非同期）で実行することを推奨
+    
+    return
