@@ -50,3 +50,44 @@ class TeamDetails(Team):
     """
     students: List[TeamStudent] = []
     # TODO: 必要に応じて学習統計のサマリーなどを追加
+
+class StudentLearningSummary(BaseModel):
+    """
+    【教師用】生徒個別の学習サマリー
+    """
+    posts_count: int = 0
+    answers_count: int = 0
+    accuracy: float = 0.0
+    last_activity_at: Optional[datetime] = None
+    is_active: bool = False # 最終活動から一定期間内かどうか (例: 7日以内)
+
+    class Config:
+        from_attributes = True
+
+class TeamMemberDetails(BaseModel):
+    """
+    【教師用】チームメンバーの詳細情報（プロフィール + 学習サマリー）
+    """
+    user_id: uuid.UUID
+    nickname: Optional[str]
+    email: str
+    joined_at: datetime
+    learning_summary: StudentLearningSummary
+
+    class Config:
+        from_attributes = True
+
+class TeamMembersListResponse(BaseModel):
+    """
+    【教師用】チーム詳細ページのレスポンス
+    """
+    team_id: uuid.UUID
+    team_name: str
+    total_members: int
+    active_members_count: int
+    average_posts_per_member: float
+    overall_average_accuracy: float
+    members: List[TeamMemberDetails]
+
+    class Config:
+        from_attributes = True

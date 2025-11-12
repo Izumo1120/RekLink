@@ -1,5 +1,4 @@
-// @/types/api.d.ts でグローバル型 (User, Token, ApiErrorResponse) が
-// 定義されていることを前提としています。（importは不要）
+// @/types/api.d.ts でグローバル型が定義されている前提
 
 // バックエンドAPIのベースURL
 const API_BASE_URL = 'http://localhost:8080/api/v1';
@@ -16,21 +15,25 @@ const handleResponse = async (response: Response) => {
       // エラーレスポンスのJSON ({"detail": "..."}) をパース試行
       errorData = await response.json();
     } catch (e) {
-      // 500エラーなどでJSONが返ってこなかった場合
+      // JSONのパースに失敗した場合（500エラーでHTMLが返ってきた場合など）
       throw new Error(`APIエラー (ステータス: ${response.status})`);
     }
 
     const errorDetail = errorData.detail || '不明なAPIエラーが発生しました。';
 
     // Home.tsx の catch ブロックが 404 (Not Found) を正しく検知できるように、
-    // "not found" という文字列をエラーメッセージに含める
+    // "not found" や "not part" という文字列をエラーメッセージに含める
     if (response.status === 404) {
-      // "detail" が "User is not part of..." のような文字列であることを期待
-      throw new Error(`Not Found: ${errorDetail}`);
+      const detailString = typeof errorDetail === 'string' ? errorDetail : JSON.stringify(errorDetail);
+      // エラーメッセージに "Not Found" や "not part" が含まれていなければ、追加する
+      if (!detailString.toLowerCase().includes('not found') && !detailString.toLowerCase().includes('not part')) {
+        throw new Error(`Not Found: ${detailString}`);
+      }
+      throw new Error(detailString);
     }
 
-    // 400, 401, 403, 422 などのその他のエラー
-    throw new Error(errorDetail);
+    // 401, 403, 422 などのその他のエラー
+    throw new Error(typeof errorDetail === 'string' ? errorDetail : JSON.stringify(errorDetail));
   }
 
   // --- 正常なレスポンス (200-299) の処理 ---
@@ -55,72 +58,36 @@ const getAuthHeaders = (token: string) => {
 // ---------------------------------------------------------------------------
 // 認証・アカウント管理 API (Auth / Users)
 // ---------------------------------------------------------------------------
-
-/**
- * ログインAPIを呼び出す (Login.tsx が使用)
- * @param email - ユーザーのメールアドレス
- * @param password - ユーザーのパスワード
- * @returns {Promise<Token>} - アクセストークンを含むオブジェクト
- */
 export const loginUser = async (email: string, password: string): Promise<Token> => {
-  // バックエンドの /auth/login は OAuth2PasswordRequestForm を期待しているため、
-  // 'application/x-www-form-urlencoded' 形式でデータを送信する必要があります。
   const body = new URLSearchParams();
-  body.append('username', email); // FastAPIのOAuth2フォームは 'username' を期待します
+  body.append('username', email);
   body.append('password', password);
-
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body,
   });
-
   return handleResponse(response);
 };
-
-/**
- * ユーザー新規登録APIを呼び出す (Signup.tsx が使用)
- * @param userData - 新規ユーザー情報 (email, password, nickname, role)
- * @returns {Promise<User>} - 作成されたユーザー情報
- */
 export const registerUser = async (userData: UserCreate): Promise<User> => {
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(userData),
   });
-
   return handleResponse(response);
 };
-
-
-/**
- * 現在のユーザー情報を取得する (Login.tsx が使用)
- * @param token - 認証トークン
- * @returns {Promise<User>} - ユーザー情報
- */
 export const getMe = async (token: string): Promise<User> => {
   const response = await fetch(`${API_BASE_URL}/auth/me`, {
     method: 'GET',
-    headers: getAuthHeaders(token), // ヘルパー関数を使用
+    headers: getAuthHeaders(token),
   });
-
   return handleResponse(response);
 };
 
 // ---------------------------------------------------------------------------
-// チーム API (Home.tsx が使用)
+// チーム API
 // ---------------------------------------------------------------------------
-
-/**
- * 【生徒用】自身が所属するチーム情報を取得する (Home.tsx が使用)
- * @param token - 認証トークン
- * @returns {Promise<Team>} - チーム情報
- */
 export const getStudentTeam = async (token: string): Promise<Team> => {
   const response = await fetch(`${API_BASE_URL}/teams/me`, {
     method: 'GET',
@@ -128,16 +95,8 @@ export const getStudentTeam = async (token: string): Promise<Team> => {
   });
   return handleResponse(response);
 };
-
-/**
- * 【生徒用】チームに参加する (Home.tsx が使用)
- * @param token - 認証トークン
- * @param code - 6桁の参加コード
- * @returns {Promise<Team>} - 参加したチーム情報
- */
 export const joinTeam = async (token: string, code: string): Promise<Team> => {
   const body: TeamJoin = { join_code: code };
-
   const response = await fetch(`${API_BASE_URL}/teams/join`, {
     method: 'POST',
     headers: getAuthHeaders(token),
@@ -145,36 +104,135 @@ export const joinTeam = async (token: string, code: string): Promise<Team> => {
   });
   return handleResponse(response);
 };
-
-// ---------------------------------------------------------------------------
-// コンテンツ API (Home.tsx などが使用)
-// ---------------------------------------------------------------------------
-
-/**
- * 【共通】おすすめフィード（クイズ・豆知識）を取得する (Home.tsx が使用)
- * @param token - 認証トークン
- * @returns {Promise<(Quiz | Trivia)[]>} - コンテンツの配列
- */
-export const getFeed = async (token: string): Promise<(Quiz | Trivia)[]> => {
-  const response = await fetch(`${API_BASE_URL}/feed`, {
+export const getMyTeams = async (token: string): Promise<Team[]> => {
+  const response = await fetch(`${API_BASE_URL}/teams/`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+export const createTeam = async (token: string, teamName: string): Promise<Team> => {
+  const body: TeamCreate = { name: teamName };
+  const response = await fetch(`${API_BASE_URL}/teams/`, {
+    method: 'POST',
+    headers: getAuthHeaders(token),
+    body: JSON.stringify(body),
+  });
+  return handleResponse(response);
+};
+export const regenerateCode = async (token: string, teamId: string): Promise<Team> => {
+  const response = await fetch(`${API_BASE_URL}/teams/${teamId}/regenerate-code`, {
+    method: 'POST',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+export const getTeamDetails = async (token: string, teamId: string): Promise<TeamDetails> => {
+  const response = await fetch(`${API_BASE_URL}/teams/${teamId}`, {
     method: 'GET',
     headers: getAuthHeaders(token),
   });
   return handleResponse(response);
 };
 
-/**
- * 【共通】クイズ一覧を取得する (Landing.tsx の遷移先で使用)
- * ※このAPIは認証が不要
- * @returns {Promise<Quiz[]>} - クイズの配列
- */
+// ---------------------------------------------------------------------------
+// コンテンツ API
+// ---------------------------------------------------------------------------
+export const getFeed = async (token: string): Promise<(Quiz | Trivia)[]> => {
+  // ... (省略)
+  const response = await fetch(`${API_BASE_URL}/feed`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
 export const getQuizzes = async (): Promise<Quiz[]> => {
+  // ... (省略)
   const response = await fetch(`${API_BASE_URL}/quizzes`, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
   });
   return handleResponse(response);
 };
 
+// ---------------------------------------------------------------------------
+// ダッシュボード API
+// ---------------------------------------------------------------------------
+export const getDashboardSummary = async (token: string, teamId?: string): Promise<DashboardSummary> => {
+  // ... (省略)
+  const url = new URL(`${API_BASE_URL}/dashboard/summary`);
+  if (teamId) {
+    url.searchParams.append('team_id', teamId);
+  }
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+export const getPopularTags = async (token: string, teamId?: string): Promise<PopularTag[]> => {
+  // ... (省略)
+  const url = new URL(`${API_BASE_URL}/dashboard/popular-tags`);
+  if (teamId) {
+    url.searchParams.append('team_id', teamId);
+  }
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
+// ---------------------------------------------------------------------------
+// 指摘管理 API
+// ---------------------------------------------------------------------------
+export const getReports = async (token: string): Promise<ReportDetails[]> => {
+  // ... (省略)
+  const response = await fetch(`${API_BASE_URL}/reports/`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+export const getReportContent = async (token: string, reportId: string): Promise<ContentForReport> => {
+  // ... (省略)
+  const response = await fetch(`${API_BASE_URL}/reports/${reportId}/content`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+export const resolveReport = async (token: string, reportId: string, updateData: ReportStatusUpdate): Promise<ReportDetails> => {
+  // ... (省略)
+  const response = await fetch(`${API_BASE_URL}/reports/${reportId}/resolve`, {
+    method: 'PUT',
+    headers: getAuthHeaders(token),
+    body: JSON.stringify(updateData),
+  });
+  return handleResponse(response);
+};
+
+
+// --- ★★★ ここから新規追加 (チーム詳細・メンバー一覧) ★★★ ---
+/**
+ * 【教師用】チームメンバーの一覧と学習サマリーを取得する
+ * @param token - 認証トークン
+ * @param teamId - 対象のチームID
+ * @returns {Promise<TeamMembersListResponse>} - チーム詳細とメンバーリスト
+ */
+export const getTeamMembersWithLearningSummary = async (token: string, teamId: string): Promise<TeamMembersListResponse> => {
+  // バックエンドに /api/v1/teams/{teamId}/members というAPIが実装されていると想定
+  const response = await fetch(`${API_BASE_URL}/teams/${teamId}/members`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
+export const getStudentDetails = async (token: string, studentId: string): Promise<StudentDetails> => {
+  const response = await fetch(`${API_BASE_URL}/students/${studentId}`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};

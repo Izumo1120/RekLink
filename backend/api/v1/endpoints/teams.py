@@ -275,3 +275,129 @@ async def regenerate_join_code(
     # asyncpg.Record を dict に変換
     return dict(updated_team_record)
 
+@router.get(
+    "/{team_id}/members",
+    response_model=team_schema.TeamMembersListResponse,
+    summary="【教師用】チームメンバーの詳細な学習状況一覧を取得"
+)
+async def get_team_members_with_learning_summary(
+    team_id: uuid.UUID,
+    conn: asyncpg.Connection = Depends(deps.get_db),
+    current_teacher: user_schema.User = Depends(get_current_teacher)
+):
+    """
+    チーム詳細ページ（メンバー一覧）に必要な、生徒の学習サマリーを含む
+    すべての情報を集計して返します。（教師権限が必要）
+    """
+    
+    # 1. 教師がチームのオーナーであることを確認 (team_record が返ってくる)
+    team_record = await _verify_team_owner(team_id, conn, current_teacher)
+
+    # 2. 非常に複雑な集計クエリ
+    #    Common Table Expressions (WITH句) を使い、複数の集計を事前に行う
+    query = """
+    WITH team_members AS (
+        -- 1. このチームのメンバーリストを取得
+        SELECT u.id, u.nickname, u.email, tm.joined_at
+        FROM users u
+        JOIN team_members tm ON u.id = tm.user_id
+        WHERE tm.team_id = $1 AND u.role = 'student'
+    ),
+    posts AS (
+        -- 2. メンバーの投稿数を集計
+        SELECT author_id, COUNT(*) AS posts_count
+        FROM contents
+        WHERE author_id = ANY(SELECT id FROM team_members)
+        GROUP BY author_id
+    ),
+    answers AS (
+        -- 3. メンバーの解答数と正解数を集計
+        SELECT
+            user_id,
+            COUNT(*) AS answers_count,
+            COUNT(*) FILTER (WHERE is_correct = TRUE) AS correct_answers_count
+        FROM user_answers
+        WHERE user_id = ANY(SELECT id FROM team_members)
+        GROUP BY user_id
+    ),
+    activity AS (
+        -- 4. メンバーの最終活動日 (投稿 または 解答) を取得
+        SELECT
+            user_id,
+            MAX(action_at) AS last_activity_at
+        FROM (
+            SELECT author_id AS user_id, created_at AS action_at FROM contents WHERE author_id = ANY(SELECT id FROM team_members)
+            UNION ALL
+            SELECT user_id, answered_at AS action_at FROM user_answers WHERE user_id = ANY(SELECT id FROM team_members)
+        ) AS all_actions
+        GROUP BY user_id
+    )
+    -- 5. すべてのデータを結合して最終的なメンバーリストを生成
+    SELECT
+        tm.id AS user_id,
+        tm.nickname,
+        tm.email,
+        tm.joined_at,
+        COALESCE(p.posts_count, 0) AS posts_count,
+        COALESCE(a.answers_count, 0) AS answers_count,
+        COALESCE(a.correct_answers_count, 0) AS correct_answers_count,
+        act.last_activity_at,
+        (act.last_activity_at > NOW() - INTERVAL '7 days') AS is_active
+    FROM
+        team_members tm
+    LEFT JOIN posts p ON tm.id = p.author_id
+    LEFT JOIN answers a ON tm.id = a.user_id
+    LEFT JOIN activity act ON tm.id = act.user_id
+    ORDER BY
+        tm.nickname;
+    """
+    
+    member_records = await conn.fetch(query, team_id)
+
+    # 3. 取得したデータをレスポンスの形に整形
+    members_list = []
+    total_posts = 0
+    total_answers = 0
+    total_correct = 0
+    active_count = 0
+
+    for r in member_records:
+        accuracy = 0.0
+        if r['answers_count'] > 0:
+            accuracy = (r['correct_answers_count'] / r['answers_count']) * 100
+        
+        if r['is_active']:
+            active_count += 1
+        
+        total_posts += r['posts_count']
+        total_answers += r['answers_count']
+        total_correct += r['correct_answers_count']
+
+        members_list.append({
+            "user_id": r['user_id'],
+            "nickname": r['nickname'],
+            "email": r['email'],
+            "joined_at": r['joined_at'],
+            "learning_summary": {
+                "posts_count": r['posts_count'],
+                "answers_count": r['answers_count'],
+                "accuracy": accuracy,
+                "last_activity_at": r['last_activity_at'],
+                "is_active": r['is_active']
+            }
+        })
+    
+    # 4. チーム全体のサマリーを計算
+    total_members = len(members_list)
+    avg_posts = (total_posts / total_members) if total_members > 0 else 0
+    overall_accuracy = (total_correct / total_answers) * 100 if total_answers > 0 else 0
+
+    return {
+        "team_id": team_id,
+        "team_name": team_record['name'],
+        "total_members": total_members,
+        "active_members_count": active_count,
+        "average_posts_per_member": avg_posts,
+        "overall_average_accuracy": overall_accuracy,
+        "members": members_list
+    }

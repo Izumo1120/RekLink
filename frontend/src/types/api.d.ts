@@ -6,14 +6,14 @@
  * APIエラーレスポンスのスキーマ (FastAPIのHTTPException用)
  */
 interface ApiErrorResponse {
-  detail: string | any; // ★ 'detail' を追加
+  detail: string | any; // エラー詳細
 }
 
 /**
  * トークンのスキーマ (schemas/token.py の Token に対応)
  */
 interface Token {
-  access_token: string; // ★ 'access_token' を追加
+  access_token: string;
   token_type: 'bearer';
 }
 
@@ -34,10 +34,10 @@ interface User {
  * 新規登録用のスキーマ (schemas/user.py の UserCreate に対応)
  */
 interface UserCreate {
-  email: string;      // ★ 'email' を追加
-  password: string;   // ★ 'password' を追加
-  nickname: string;   // ★ 'nickname' を追加
-  role: 'student' | 'teacher'; // ★ 'role' を追加
+  email: string;
+  password: string;
+  nickname: string;
+  role: 'student' | 'teacher';
 }
 
 /**
@@ -48,6 +48,30 @@ interface Team {
   name: string;
   join_code: string;
   created_at: string;
+}
+
+/**
+ * チーム作成用のスキーマ (schemas/team.py の TeamCreate に対応)
+ */
+interface TeamCreate {
+  name: string;
+}
+
+/**
+ * チーム所属生徒のスキーマ (schemas/team.py の TeamStudent に対応)
+ */
+interface TeamStudent {
+  user_id: string; // UUID
+  nickname: string | null;
+  email: string;
+  joined_at: string;
+}
+
+/**
+ * チーム詳細のスキーマ (schemas/team.py の TeamDetails に対応)
+ */
+interface TeamDetails extends Team {
+  students: TeamStudent[];
 }
 
 /**
@@ -105,3 +129,146 @@ interface Trivia {
   tags: Tag[];
 }
 
+/**
+ * ダッシュボードサマリーのスキーマ (schemas/dashboard.py の DashboardSummary に対応)
+ */
+interface DashboardSummary {
+  total_students: number;
+  total_quizzes_answered: number;
+  overall_accuracy: number;
+  total_posts_created: number;
+  pending_reports_count: number;
+}
+
+/**
+ * 人気タグのスキーマ (schemas/dashboard.py の PopularTag に対応)
+ */
+interface PopularTag {
+  tag_id: string; // UUID
+  tag_name: string;
+  usage_count: number;
+}
+
+/**
+ * 指摘カテゴリの型
+ */
+type ReportCategory = 'major_error' | 'minor_error' | 'improvement';
+/**
+ * 指摘ステータスの型
+ */
+type ReportStatus = 'pending' | 'in_progress' | 'resolved' | 'rejected';
+
+/**
+ * 指摘ステータス更新リクエストのスキーマ (schemas/report.py の ReportStatusUpdate に対応)
+ */
+interface ReportStatusUpdate {
+  status: ReportStatus;
+  resolution_note?: string;
+}
+
+/**
+ * 指摘の詳細スキーマ (schemas/report.py の ReportDetails に対応)
+ */
+interface ReportDetails {
+  id: string; // UUID
+  content_id: string; // UUID
+  reporter_id: string; // UUID
+  reporter_nickname: string | null;
+  content_title: string;
+  category: ReportCategory;
+  description: string;
+  status: ReportStatus;
+  created_at: string;
+  resolved_at: string | null;
+  resolution_note: string | null;
+}
+
+/**
+ * 指摘対象コンテンツのスキーマ (schemas/report.py の ContentForReport に対応)
+ */
+interface ContentForReport {
+  id: string; // UUID
+  content_type: 'quiz' | 'trivia';
+  title: string;
+  content: string;
+  explanation: string | null;
+  // options: QuizOption[]; // TODO: 必要に応じて追加
+}
+
+/**
+ * 生徒の学習サマリーのスキーマ (バックエンドで計算される想定)
+ */
+interface StudentLearningSummary {
+  posts_count: number;
+  answers_count: number;
+  accuracy: number;
+  last_activity_at: string | null;
+  is_active: boolean; // 最終活動から一定期間内かどうか
+}
+
+/**
+ * チームメンバー詳細のスキーマ (バックエンドでJOIN・集計される想定)
+ */
+interface TeamMemberDetails {
+  user_id: string; // UUID
+  nickname: string | null;
+  email: string;
+  joined_at: string;
+  learning_summary: StudentLearningSummary;
+}
+
+/**
+ * チームメンバーリストレスポンスのスキーマ
+ * (GET /api/v1/teams/{teamId}/members のレスポンスを想定)
+ */
+interface TeamMembersListResponse {
+  team_id: string;
+  team_name: string;
+  total_members: number;
+  active_members_count: number;
+  average_posts_per_member: number;
+  overall_average_accuracy: number;
+  members: TeamMemberDetails[];
+}
+
+/**
+ * 簡易コンテンツ情報 (schemas/content.py の ContentInfo に対応)
+ */
+interface ContentInfo {
+  id: string; // UUID
+  content_type: 'quiz' | 'trivia';
+  title: string;
+  created_at: string;
+}
+
+/**
+ * ユーザー解答履歴 (schemas/content.py の UserAnswer に対応)
+ */
+interface UserAnswer {
+  id: string; // UUID
+  content_id: string; // UUID
+  quiz_title: string;
+  selected_option_id: string; // UUID
+  is_correct: boolean;
+  answered_at: string;
+}
+
+/**
+ * ユーザー統計 (schemas/user.py の UserStats に対応)
+ */
+interface UserStats {
+  total_quizzes_answered: number;
+  correct_answers: number;
+  accuracy: number;
+  posts_created: number;
+}
+
+/**
+ * 生徒詳細 (schemas/user.py の StudentDetails に対応)
+ */
+interface StudentDetails {
+  profile: User;
+  stats: UserStats;
+  recent_posts: ContentInfo[];
+  recent_answers: UserAnswer[];
+}

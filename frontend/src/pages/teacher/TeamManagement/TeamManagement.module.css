@@ -1,0 +1,524 @@
+/* src/pages/teacher/TeamManagement/TeamManagement.module.css */
+
+/* --- カラーパレット --- */
+:root {
+  --main-color: #2E7D32;
+  --bg-color: #F8F9FA;
+  --card-bg: #FFFFFF;
+  --text-color: #343A40;
+  --text-light: #616161;
+  --border-color: #e0e0e0;
+  --danger-color: #D32F2F;
+  --danger-outline: #E57373;
+}
+
+/* --- ダッシュボードから流用する共通レイアウト --- */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+.loadingScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: #666;
+  background-color: var(--bg-color);
+}
+
+.header {
+  width: 260px;
+  background-color: var(--card-bg);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo img {
+  width: 32px;
+  height: 32px;
+}
+
+.logo h1 {
+  font-size: 1.25rem;
+  color: var(--main-color);
+  margin: 0;
+  font-weight: 600;
+}
+
+.headerNav {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.navButton,
+.navButtonActive {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.navButton {
+  color: var(--text-light);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navButton:hover {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.navButtonActive {
+  background-color: #e8f5e9;
+  color: var(--main-color);
+}
+
+.navIcon {
+  width: 20px;
+  height: 20px;
+  color: inherit;
+  object-fit: contain;
+}
+
+.navIconInactive {
+  filter: invert(39%) sepia(8%) saturate(1030%) hue-rotate(176deg) brightness(94%) contrast(88%);
+}
+
+.navButton:hover .navIconInactive {
+  filter: invert(16%) sepia(10%) saturate(615%) hue-rotate(176deg) brightness(97%) contrast(89%);
+}
+
+/* --- メインコンテンツ --- */
+.mainContainer {
+  flex: 1;
+  padding: 2rem;
+  margin-left: 260px;
+  padding-bottom: 80px;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pageTitle h2 {
+  font-size: 1.8rem;
+  color: var(--text-color);
+  margin: 0 0 0.25rem 0;
+}
+
+.pageTitle p {
+  font-size: 1rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--main-color);
+  font-weight: 500;
+  padding: 0.5rem;
+  margin-left: -0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: #e8f5e9;
+}
+
+.createTeamButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: var(--main-color);
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.createTeamButton:hover {
+  background-color: #1b5e20;
+}
+
+/* --- チームカード --- */
+.teamCard {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+  /* 巻物風のヘッダー */
+  background-image: linear-gradient(180deg, rgba(215, 204, 200, 0.2) 0%, rgba(215, 204, 200, 0.0) 15%);
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cardTitle img {
+  width: 24px;
+  height: 24px;
+  filter: invert(39%) sepia(8%) saturate(1030%) hue-rotate(176deg) brightness(94%) contrast(88%);
+}
+
+.cardTitle h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-color);
+}
+
+.studentCount {
+  margin-left: auto;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.cardContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.teamInfo h4,
+.joinCode h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.teamInfo p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.teamInfo p span {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-left: 0.5rem;
+}
+
+.codeDisplay {
+  background-color: var(--bg-color);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--main-color);
+  text-align: center;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+}
+
+.codeActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.joinCode small {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  text-align: center;
+  display: block;
+}
+
+.cardActions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* --- 共通ボタン --- */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.buttonPrimary {
+  background-color: var(--main-color);
+  color: white;
+  border: 2px solid var(--main-color);
+}
+
+.buttonPrimary:hover {
+  background-color: #1b5e20;
+  border-color: #1b5e20;
+}
+
+.buttonSecondary {
+  background-color: var(--card-bg);
+  color: var(--main-color);
+  border: 2px solid var(--main-color);
+}
+
+.buttonSecondary:hover {
+  background-color: #e8f5e9;
+}
+
+.buttonDangerOutline {
+  background-color: var(--card-bg);
+  color: var(--danger-color);
+  border: 2px solid var(--danger-outline);
+}
+
+.buttonDangerOutline:hover {
+  background-color: var(--danger-bg);
+  color: #c62828;
+  border-color: #c62828;
+}
+
+/* --- 新規作成フォーム --- */
+.createForm {
+  padding: 1.5rem 2rem;
+  background: #fff;
+}
+
+.createForm h3 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: var(--main-color);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.errorMessage {
+  color: var(--danger-color);
+  background-color: var(--danger-bg);
+  border: 1px solid var(--danger-color);
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+}
+
+/* --- フッター（スマホ用） --- */
+.mobileFooter {
+  display: none;
+  /* PC・タブレット(横)では非表示 */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-around;
+  padding: 0.5rem 0;
+  z-index: 1000;
+}
+
+.mobileNavButton,
+.mobileNavButtonActive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  border: none;
+  background: none;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  flex: 1;
+  text-decoration: none;
+}
+
+.mobileNavButton {
+  color: var(--text-light);
+}
+
+.mobileNavButtonActive {
+  color: var(--main-color);
+}
+
+.navIconMobile {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+  object-fit: contain;
+}
+
+.navIconInactiveMobile {
+  filter: invert(39%) sepia(8%) saturate(1030%) hue-rotate(176deg) brightness(94%) contrast(88%);
+}
+
+
+/* --- ★★★ レスポンシブ対応 ★★★ --- */
+@media (max-width: 1024px) {
+
+  /* タブレットではサイドバーを細くする */
+  .header {
+    width: 80px;
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+  }
+
+  .logo h1 {
+    display: none;
+  }
+
+  .navButton span,
+  .navButtonActive span {
+    display: none;
+  }
+
+  .navButton,
+  .navButtonActive {
+    justify-content: center;
+  }
+
+  .mainContainer {
+    margin-left: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* スマホではサイドバーを非表示 */
+  .header {
+    display: none;
+  }
+
+  .mainContainer {
+    margin-left: 0;
+    padding: 1rem;
+    padding-bottom: 80px;
+    /* フッターの高さ */
+  }
+
+  /* スマホ用フッターを表示 */
+  .mobileFooter {
+    display: flex;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .pageTitle h2 {
+    font-size: 1.5rem;
+  }
+
+  .pageTitle p {
+    font-size: 0.9rem;
+  }
+
+  .backButton {
+    margin-bottom: 0;
+  }
+
+  .cardContent {
+    grid-template-columns: 1fr;
+    /* 1カラムに */
+  }
+
+  .teamInfo {
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 1.5rem;
+  }
+
+  .cardActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}

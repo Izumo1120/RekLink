@@ -1,28 +1,24 @@
-"use client"; // Vite環境では不要ですが、Reactの規約として
+"use client";
 
 import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Home.module.css';
 
-// api.ts から必要な関数をインポート
+// APIクライアントとストアをインポート
 import { getStudentTeam, joinTeam, getFeed } from '@lib/api';
-// userStore から認証情報をインポート
 import { useUserStore } from '@store/userStore';
 
 const Home = () => {
   const navigate = useNavigate();
 
-  // --- 1. 認証状態の取得 ---
-  // getSnapshotの警告と無限ループを避けるため、セレクタを個別に分割します
+  // --- 1. 認証状態の取得 (Zustandの修正) ---
+  // ★★★ 修正 ★★★
+  // getSnapshotの警告を解消するため、セレクタを個別に分割します
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.token);
   const isAuthenticated = useUserStore((state) => state.isAuthenticated());
 
   // --- 画面の状態管理 ---
-  // 'checking' (認証・チーム確認中)
-  // 'joining' (チーム参加モーダル表示)
-  // 'ready' (フィード表示)
-  // 'error' (エラー表示)
   const [status, setStatus] = useState<'checking' | 'joining' | 'ready' | 'error'>('checking');
   const [error, setError] = useState<string | null>(null);
   const [feedItems, setFeedItems] = useState<(Quiz | Trivia)[]>([]);
@@ -31,7 +27,7 @@ const Home = () => {
   useEffect(() => {
     // 2a. 認証ガード (ログインしていない)
     if (!isAuthenticated || !token || !user) {
-      // navigate('/login'); // HMR(ホットリロード)中に実行されると不便なので、必要に応じてコメント解除
+      navigate('/login');
       return;
     }
     // 2b. 役割ガード (生徒ではない)
@@ -52,7 +48,7 @@ const Home = () => {
         setStatus('ready'); // フィード表示状態に切り替え
 
       } catch (err: any) {
-        // 404エラー (Team not found) は「チーム未参加」として扱う
+        // 404エラー (Team not found / not part) は「チーム未参加」として扱う
         if (err.message && (err.message.toLowerCase().includes('not part') || err.message.toLowerCase().includes('not found'))) {
           setStatus('joining'); // チーム参加モーダル表示状態に切り替え
         } else {
@@ -63,6 +59,7 @@ const Home = () => {
       }
     };
 
+    // ★★★ 修正 ★★★
     // 無限ループを解消するため、statusが 'checking' の時のみ
     // API呼び出しを実行するようにガードします
     if (status === 'checking') {
@@ -177,4 +174,3 @@ const Home = () => {
 };
 
 export default Home;
-
