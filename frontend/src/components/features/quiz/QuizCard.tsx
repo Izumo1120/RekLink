@@ -1,10 +1,9 @@
 // このファイルは src/components/features/quiz/ フォルダに配置してください。
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './QuizCard.module.css';
-
-// いいね・保存アイコン（ダミー）
-// TODO: lucide-react をインストール (npm install lucide-react) するか、画像アセットに差し替えてください
-
+import { useUserStore } from '@store/userStore';
+import { likeContent, unlikeContent, saveContent, unsaveContent } from '@lib/api';
 
 import Heart from '@assets/icons/heart.png';
 import Bookmark from '@assets/icons/bookmark.png';
@@ -15,31 +14,81 @@ type ContentItem = Quiz | Trivia;
 
 interface QuizCardProps {
   item: ContentItem;
+  onUpdate?: () => void; // いいね・保存後にリストを更新するためのコールバック
 }
 
-const QuizCard = ({ item }: QuizCardProps) => {
+const QuizCard = ({ item, onUpdate }: QuizCardProps) => {
   const navigate = useNavigate();
+  const token = useUserStore((state) => state.token);
+
+  const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
 
   // カードがクリックされたときの処理
   const handleCardClick = () => {
     if (item.content_type === 'quiz') {
       navigate(`/quiz/${item.id}`);
     } else {
-      // TODO: 豆知識詳細ページへの遷移
-      // navigate(`/trivia/${item.id}`);
-      console.log("豆知識カードがクリックされました:", item.id);
+      // 豆知識詳細ページへの遷移
+      navigate(`/trivia/${item.id}`);
     }
   };
 
   const handleTagClick = (e: React.MouseEvent, tagName: string) => {
     e.stopPropagation(); // カード本体へのクリックイベントを防ぐ
-    navigate(`/search?tag=${tagName}`); // TODO: 検索ページへの遷移
+    navigate(`/search?tag=${tagName}`);
   };
 
-  const handleInteraction = (e: React.MouseEvent, action: string) => {
+  const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: POST /api/v1/contents/{id}/like などのAPIを呼び出す
-    console.log(`${action} a ${item.id}`);
+    if (!token) {
+      alert('いいねするにはログインが必要です。');
+      return;
+    }
+
+    try {
+      if (isLiked) {
+        await unlikeContent(token, item.id);
+        setIsLiked(false);
+        setLikeCount(prev => Math.max(0, prev - 1));
+      } else {
+        await likeContent(token, item.id);
+        setIsLiked(true);
+        setLikeCount(prev => prev + 1);
+      }
+      onUpdate?.(); // 親コンポーネントに更新を通知
+    } catch (error: any) {
+      console.error('いいね操作に失敗しました:', error);
+      alert(error.message || 'いいね操作に失敗しました。');
+    }
+  };
+
+  const handleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!token) {
+      alert('保存するにはログインが必要です。');
+      return;
+    }
+
+    try {
+      if (isSaved) {
+        await unsaveContent(token, item.id);
+        setIsSaved(false);
+      } else {
+        await saveContent(token, item.id);
+        setIsSaved(true);
+      }
+      onUpdate?.(); // 親コンポーネントに更新を通知
+    } catch (error: any) {
+      console.error('保存操作に失敗しました:', error);
+      alert(error.message || '保存操作に失敗しました。');
+    }
+  };
+
+  const handleReport = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/report/${item.id}`);
   };
 
   return (
@@ -77,13 +126,13 @@ const QuizCard = ({ item }: QuizCardProps) => {
       </div>
 
       <div className={styles.interactions}>
-        <button onClick={(e) => handleInteraction(e, 'like')}>
-          <img src={Heart} alt="like" width={18} height={18} /> <span>0</span>
+        <button onClick={handleLike}>
+          <img src={Heart} alt="like" width={18} height={18} /> <span>{likeCount}</span>
         </button>
-        <button onClick={(e) => handleInteraction(e, 'save')}>
-          <img src={Bookmark} alt="save" width={18} height={18} /> <span>0</span>
+        <button onClick={handleSave}>
+          <img src={Bookmark} alt="save" width={18} height={18} /> <span>{isSaved ? '保存済み' : '保存'}</span>
         </button>
-        <button onClick={(e) => handleInteraction(e, 'report')}>
+        <button onClick={handleReport}>
           <img src={Flag} alt="report" width={18} height={18} />
         </button>
       </div>

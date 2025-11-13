@@ -414,3 +414,76 @@ export const createReport = async (token: string, reportData: ReportCreate): Pro
   return handleResponse(response);
 };
 
+// ---------------------------------------------------------------------------
+// いいね・保存 API
+// ---------------------------------------------------------------------------
+
+/**
+ * 【生徒用】コンテンツにいいねする
+ * @param token - 認証トークン
+ * @param contentId - コンテンツID
+ * @returns {Promise<void>}
+ */
+export const likeContent = async (token: string, contentId: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/contents/${contentId}/like`, {
+    method: 'POST',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】コンテンツのいいねを解除する
+ * @param token - 認証トークン
+ * @param contentId - コンテンツID
+ * @returns {Promise<void>}
+ */
+export const unlikeContent = async (token: string, contentId: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/contents/${contentId}/like`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】コンテンツを保存する
+ * @param token - 認証トークン
+ * @param contentId - コンテンツID
+ * @returns {Promise<void>}
+ */
+export const saveContent = async (token: string, contentId: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/contents/${contentId}/save`, {
+    method: 'POST',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】コンテンツの保存を解除する
+ * @param token - 認証トークン
+ * @param contentId - コンテンツID
+ * @returns {Promise<void>}
+ */
+export const unsaveContent = async (token: string, contentId: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/contents/${contentId}/save`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】保存済みコンテンツ一覧を取得する
+ * @param token - 認証トークン
+ * @returns {Promise<(Quiz | Trivia)[]>}
+ */
+export const getSavedContents = async (token: string): Promise<(Quiz | Trivia)[]> => {
+  const response = await fetch(`${API_BASE_URL}/users/me/saved`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+

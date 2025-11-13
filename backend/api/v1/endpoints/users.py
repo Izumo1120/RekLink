@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 import asyncpg
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -121,4 +121,67 @@ async def read_my_stats(
         "accuracy": accuracy,
         "posts_created": posts_created,
     }
+
+
+@router.get("/me/saved", response_model=List[Union[content_schema.Quiz, content_schema.Trivia]], summary="保存したコンテンツの詳細一覧を取得する")
+async def read_my_saved_contents_full(
+    conn: asyncpg.Connection = Depends(deps.get_db),
+    current_user: user_schema.User = Depends(deps.get_current_user)
+):
+    """
+    自身が保存（ブックマーク）したコンテンツの完全な詳細情報を取得します。（要認証）
+    クイズの場合は選択肢も含めて返します。
+    """
+    # 保存したコンテンツのIDを取得
+    saved_content_ids = await conn.fetch(
+        """
+        SELECT content_id FROM interactions
+        WHERE user_id = $1 AND interaction_type = 'save'
+        ORDER BY created_at DESC
+        """,
+        current_user.id
+    )
+
+    result = []
+    for record in saved_content_ids:
+        content_id = record['content_id']
+
+        # コンテンツの基本情報を取得
+        content_record = await conn.fetchrow(
+            "SELECT * FROM contents WHERE id = $1",
+            content_id
+        )
+
+        if not content_record:
+            continue
+
+        content_dict = dict(content_record)
+
+        # タグを取得
+        tag_records = await conn.fetch(
+            """
+            SELECT t.name FROM tags t
+            JOIN content_tags ct ON t.id = ct.tag_id
+            WHERE ct.content_id = $1
+            """,
+            content_id
+        )
+        content_dict['tags'] = [{'name': tag['name']} for tag in tag_records]
+
+        # クイズの場合は選択肢も取得
+        if content_dict['content_type'] == 'quiz':
+            options_records = await conn.fetch(
+                """
+                SELECT id, option_text, is_correct, display_order
+                FROM quiz_options
+                WHERE content_id = $1
+                ORDER BY display_order
+                """,
+                content_id
+            )
+            content_dict['options'] = [dict(opt) for opt in options_records]
+
+        result.append(content_dict)
+
+    return result
 

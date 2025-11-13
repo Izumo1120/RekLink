@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import styles from './Home.module.css';
 
 // APIクライアントとストアをインポート
-import { getStudentTeam, joinTeam, getFeed } from '@lib/api';
+import { getStudentTeam, joinTeam, getFeed, getSavedContents } from '@lib/api';
 import { useUserStore } from '@store/userStore';
 
 // ★★★ 新規インポート ★★★
@@ -20,6 +20,8 @@ import iconUser from '@assets/icons/people-1.png';
 import iconPlus from '@assets/icons/icon-plus.png';
 import logoBook from '@assets/icons/note-1.png';
 
+type TabType = 'recommended' | 'saved';
+
 const Home = () => {
   const navigate = useNavigate();
 
@@ -33,6 +35,8 @@ const Home = () => {
   const [status, setStatus] = useState<'checking' | 'joining' | 'ready' | 'error'>('checking');
   const [error, setError] = useState<string | null>(null);
   const [feedItems, setFeedItems] = useState<(Quiz | Trivia)[]>([]);
+  const [activeTab, setActiveTab] = useState<TabType>('recommended');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // --- 2. 認証ガード & データ取得 ---
   useEffect(() => {
@@ -79,7 +83,49 @@ const Home = () => {
   }, [isAuthenticated, user, token, navigate, status]); // <-- 依存配列に 'status' を追加
 
 
-  // --- 3. チーム参加モーダルのロジック ---
+  // --- 3. タブ切り替えとデータ更新ロジック ---
+  const handleTabChange = async (tab: TabType) => {
+    setActiveTab(tab);
+    if (!token) return;
+
+    try {
+      setIsRefreshing(true);
+      if (tab === 'saved') {
+        const saved = await getSavedContents(token);
+        setFeedItems(saved);
+      } else {
+        const feed = await getFeed(token);
+        setFeedItems(feed);
+      }
+    } catch (error: any) {
+      console.error('データ取得に失敗しました:', error);
+      alert(error.message || 'データ取得に失敗しました。');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    if (!token) return;
+
+    try {
+      setIsRefreshing(true);
+      if (activeTab === 'saved') {
+        const saved = await getSavedContents(token);
+        setFeedItems(saved);
+      } else {
+        const feed = await getFeed(token);
+        setFeedItems(feed);
+      }
+    } catch (error: any) {
+      console.error('更新に失敗しました:', error);
+      alert(error.message || '更新に失敗しました。');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // --- 4. チーム参加モーダルのロジック ---
   const [joinCode, setJoinCode] = useState('');
   const [joinError, setJoinError] = useState<string | null>(null);
   const [isJoining, setIsJoining] = useState(false);
@@ -189,12 +235,24 @@ const Home = () => {
         {/* --- タブ切り替え --- */}
         <div className={styles.tabContainer}>
           <div className={styles.tabs}>
-            <button className={styles.tabActive}>おすすめ</button>
-            <button className={styles.tabButton}>保存済み</button>
+            <button
+              className={activeTab === 'recommended' ? styles.tabActive : styles.tabButton}
+              onClick={() => handleTabChange('recommended')}
+              disabled={isRefreshing}
+            >
+              おすすめ
+            </button>
+            <button
+              className={activeTab === 'saved' ? styles.tabActive : styles.tabButton}
+              onClick={() => handleTabChange('saved')}
+              disabled={isRefreshing}
+            >
+              保存済み
+            </button>
           </div>
-          <button className={styles.refreshButton}>
+          <button className={styles.refreshButton} onClick={handleRefresh} disabled={isRefreshing}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.66699 10C1.66699 14.6025 5.39783 18.3334 10.0003 18.3334C14.6028 18.3334 18.3337 14.6025 18.3337 10C18.3337 5.39752 14.6028 1.66669 10.0003 1.66669C7.8872 1.66669 5.96131 2.47231 4.50033 3.82504M4.50033 3.82504V1.66669M4.50033 3.82504H6.66699" stroke="#2E7D32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            <span>更新</span>
+            <span>{isRefreshing ? '更新中...' : '更新'}</span>
           </button>
         </div>
 
@@ -203,12 +261,12 @@ const Home = () => {
           {feedItems.length === 0 ? (
             <div className={styles.emptyFeed}>
               <img src={iconBook} alt="コンテンツなし" />
-              <p>保存したコンテンツはありません</p>
+              <p>{activeTab === 'saved' ? '保存したコンテンツはありません' : 'コンテンツがありません'}</p>
             </div>
           ) : (
             feedItems.map((item) => (
               // ★★★ QuizCard コンポーネントを使用 ★★★
-              <QuizCard key={item.id} item={item} />
+              <QuizCard key={item.id} item={item} onUpdate={handleRefresh} />
             ))
           )}
         </div>
