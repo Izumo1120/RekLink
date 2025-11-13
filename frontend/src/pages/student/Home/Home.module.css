@@ -1,4 +1,14 @@
-/* --- 共通 --- */
+/* --- カラーパレット --- */
+:root {
+  --main-color: #2E7D32;
+  --bg-color: #F8F9FA;
+  --card-bg: #FFFFFF;
+  --text-color: #343A40;
+  --text-light: #616161;
+  --border-color: #e0e0e0;
+}
+
+/* --- チーム参加モーダル (既存) --- */
 .loadingScreen {
   display: flex;
   justify-content: center;
@@ -6,11 +16,9 @@
   height: 100vh;
   font-size: 1.5rem;
   color: #666;
-  background-color: #F8F9FA;
-  /* ベースカラー */
+  background-color: var(--bg-color);
 }
 
-/* --- チーム参加モーダル --- */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -18,13 +26,11 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  /* 半透明の黒背景 */
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 1rem;
   z-index: 1000;
-  /* 他の要素より手前に表示 */
 }
 
 .modalContent {
@@ -39,22 +45,19 @@
 
 .modalContent h2 {
   margin-top: 0;
-  color: #2E7D32;
-  /* メイン（緑） */
+  color: var(--main-color);
 }
 
 .modalContent p {
   font-size: 1rem;
   line-height: 1.6;
-  color: #343A40;
-  /* テキスト（ダークグレー） */
+  color: var(--text-color);
   margin-bottom: 1.5rem;
 }
 
 .formGroup {
   margin-bottom: 1.25rem;
   text-align: left;
-  /* ラベルを左揃えに */
 }
 
 .formGroup label {
@@ -74,7 +77,7 @@
 
 .formGroup input:focus {
   outline: none;
-  border-color: #2E7D32;
+  border-color: var(--main-color);
   box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
 }
 
@@ -86,7 +89,7 @@
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  background-color: #2E7D32;
+  background-color: var(--main-color);
   color: white;
   transition: background-color 0.3s ease;
   margin-top: 0.5rem;
@@ -98,7 +101,6 @@
 
 .errorMessage {
   color: #E53E3E;
-  /* エラー（赤） */
   background-color: rgba(229, 62, 62, 0.1);
   border: 1px solid #E53E3E;
   padding: 0.75rem;
@@ -109,52 +111,283 @@
 }
 
 
-/* --- ホーム（フィード）画面 --- */
+/* --- ★★★ ここから ホーム（フィード）画面 ★★★ --- */
 .homeContainer {
+  /* PC/タブレット(横)では中央寄せ */
   max-width: 800px;
   margin: 0 auto;
-  padding: 1rem;
+  padding-bottom: 80px;
+  /* スマホフッター分 */
+  background-color: var(--card-bg);
 }
 
+/* --- ヘッダー（PC・タブレット用）--- */
 .header {
-  padding: 1rem 0;
-  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  /* 巻物風の背景 */
+  background-image: linear-gradient(180deg, rgba(215, 204, 200, 0.2) 0%, rgba(215, 204, 200, 0.0) 100%);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo img {
+  width: 32px;
+  height: 32px;
+}
+
+.logo h1 {
+  font-size: 1.25rem;
+  color: var(--main-color);
+  margin: 0;
+  font-weight: 600;
+}
+
+.headerNav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.navButton,
+.navButtonActive {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.navButton {
+  color: var(--text-light);
+}
+
+.navButton:hover {
+  background-color: var(--bg-color);
+}
+
+.navButtonActive {
+  background-color: var(--main-color);
+  color: white;
+}
+
+.navIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.navIconInactive {
+  filter: invert(39%) sepia(8%) saturate(1030%) hue-rotate(176deg) brightness(94%) contrast(88%);
+}
+
+.navButtonActive .navIcon {
+  filter: brightness(0) invert(1);
+}
+
+
+/* --- メインコンテンツ --- */
+.mainContent {
+  padding: 1.5rem;
+  /* スマホでは背景色を白ではなくグレーにする */
+  background-color: var(--bg-color);
+}
+
+.tabContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1.5rem;
 }
 
-.header h1 {
-  margin: 0;
-  color: #2E7D32;
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #e0e0e0;
+  /* デザイン画像に合わせて変更 */
+  padding: 0.3rem;
+  border-radius: 8px;
+}
+
+.tabButton,
+.tabActive {
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabButton {
+  background-color: transparent;
+  color: var(--text-light);
+}
+
+.tabButton:hover {
+  background-color: #f0f0f0;
+}
+
+.tabActive {
+  background-color: var(--card-bg);
+  color: var(--main-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.refreshButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--main-color);
+  cursor: pointer;
+  background-color: var(--card-bg);
+}
+
+.refreshButton:hover {
+  background-color: #f9f9f9;
 }
 
 .feedList {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
-/* クイズカードのダミースタイル */
-.quizCardDummy {
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
-  padding: 1.5rem;
+.emptyFeed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text-light);
+  background-color: var(--card-bg);
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  transition: box-shadow 0.2s ease-in-out;
+  border: 1px solid var(--border-color);
 }
 
-.quizCardDummy:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+.emptyFeed img {
+  width: 60px;
+  height: 60px;
+  filter: invert(70%) sepia(0%) saturate(546%) hue-rotate(193deg) brightness(91%) contrast(87%);
+  margin-bottom: 1rem;
 }
 
-.quizCardDummy h3 {
-  margin-top: 0;
-  color: #333;
+/* --- フッター（スマホ用） --- */
+.mobileFooter {
+  display: none;
+  /* PC・タブレット(横)では非表示 */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-around;
+  padding: 0.5rem 0;
+  z-index: 1000;
 }
 
-.quizCardDummy p {
-  color: #777;
-  font-size: 0.9rem;
-  margin: 0;
+.mobileNavButton,
+.mobileNavButtonActive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  border: none;
+  background: none;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  flex: 1;
+  text-decoration: none;
+}
+
+.mobileNavButton {
+  color: var(--text-light);
+}
+
+.mobileNavButtonActive {
+  color: var(--main-color);
+}
+
+.navIconMobile {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+  object-fit: contain;
+}
+
+.navIconInactiveMobile {
+  filter: invert(39%) sepia(8%) saturate(1030%) hue-rotate(176deg) brightness(94%) contrast(88%);
+}
+
+.createButton {
+  background-color: var(--main-color);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -20px;
+  /* 上に飛び出す */
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+  border: 3px solid white;
+}
+
+.navIconPlus {
+  filter: brightness(0) invert(1);
+  width: 28px;
+  height: 28px;
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 768px) {
+
+  /* スマホではヘッダー非表示 */
+  .header {
+    display: none;
+  }
+
+  .homeContainer {
+    padding: 0;
+    /* PC/タブレットの余白を削除 */
+    padding-bottom: 80px;
+    /* フッターの高さ */
+    background-color: var(--bg-color);
+    /* 背景色を変更 */
+  }
+
+  .mainContent {
+    padding: 0.75rem;
+    /* スマホでの左右余白 */
+  }
+
+  .mobileFooter {
+    display: flex;
+  }
 }

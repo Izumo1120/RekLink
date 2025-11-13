@@ -1,0 +1,570 @@
+/* src/pages/student/QuizDetail/QuizDetail.module.css */
+
+/* --- カラーパレット --- */
+:root {
+  --main-color: #2E7D32;
+  --bg-color: #F8F9FA;
+  --card-bg: #FFFFFF;
+  --text-color: #343A40;
+  --text-light: #616161;
+  --border-color: #e0e0e0;
+  --correct-bg: #e8f5e9;
+  --correct-border: #a5d6a7;
+  --correct-text: #1b5e20;
+  --incorrect-bg: #ffebee;
+  --incorrect-border: #ef9a9a;
+  --incorrect-text: #D32F2F;
+}
+
+/* --- ホーム画面から流用する共通レイアウト --- */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+.loadingScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: #666;
+  background-color: var(--bg-color);
+}
+
+.header {
+  width: 260px;
+  background-color: var(--card-bg);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo img {
+  width: 32px;
+  height: 32px;
+}
+
+.logo h1 {
+  font-size: 1.25rem;
+  color: var(--main-color);
+  margin: 0;
+  font-weight: 600;
+}
+
+.headerNav {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.navButton,
+.navButtonActive {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.navButton {
+  color: var(--text-light);
+}
+
+.navButton:hover {
+  background-color: var(--bg-color);
+}
+
+.navButtonActive {
+  background-color: var(--main-color);
+  color: white;
+}
+
+.navIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.navIconInactive {
+  filter: invert(39%) sepia(8%) saturate(1030%) hue-rotate(176deg) brightness(94%) contrast(88%);
+}
+
+.navButtonActive .navIcon {
+  filter: brightness(0) invert(1);
+}
+
+/* --- メインコンテンツ --- */
+.mainContainer {
+  flex: 1;
+  padding: 2rem;
+  /* PC/タブレットではサイドバーのマージン */
+  margin-left: 260px;
+  /* スマホではフッターのマージン */
+  padding-bottom: 80px;
+  max-width: 800px;
+  /* スマホでは中央寄せしない */
+  margin-left: 260px;
+  margin-right: auto;
+}
+
+.pageTitle {
+  margin-bottom: 1rem;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--main-color);
+  font-weight: 500;
+  padding: 0.5rem;
+  margin-left: -0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: #e8f5e9;
+}
+
+.backButtonIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* --- コンテンツカード --- */
+.contentCard {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border-color);
+  /* 巻物風の背景 */
+  background-image: linear-gradient(180deg, rgba(215, 204, 200, 0.2) 0%, rgba(215, 204, 200, 0.0) 15%);
+}
+
+.cardHeader {
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  color: #fff;
+}
+
+.quizBadge {
+  background-color: var(--main-color);
+}
+
+.triviaBadge {
+  background-color: #546E7A;
+}
+
+.authorName {
+  font-size: 0.85rem;
+  color: #777;
+  margin-left: auto;
+  /* 右寄せ */
+}
+
+.cardBody {
+  padding: 1.5rem 2rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.content {
+  font-size: 1rem;
+  color: var(--text-color);
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  /* 改行を反映 */
+}
+
+/* --- クイズ選択肢 --- */
+.optionsContainer {
+  margin-top: 2rem;
+}
+
+.optionsContainer>label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.option,
+.optionSelected,
+.optionCorrect,
+.optionIncorrect {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.75rem;
+  text-align: left;
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+}
+
+.option:hover {
+  background-color: #f0f0f0;
+}
+
+.optionSelected {
+  composes: option;
+  border-color: var(--main-color);
+  background-color: #e8f5e9;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+/* 解答後のスタイル */
+.optionCorrect {
+  composes: option;
+  border-color: var(--main-color);
+  background-color: var(--correct-bg);
+  color: var(--correct-text);
+  font-weight: 700;
+  cursor: default;
+}
+
+.optionIncorrect {
+  composes: option;
+  border-color: var(--incorrect-border);
+  background-color: var(--incorrect-bg);
+  color: var(--incorrect-text);
+  font-weight: 700;
+  cursor: default;
+}
+
+.option:disabled:not(.optionCorrect):not(.optionIncorrect) {
+  /* 解答後の他の選択肢 */
+  cursor: default;
+  opacity: 0.7;
+  background-color: #fafafa;
+}
+
+/* 解答ボタン */
+.submitButton {
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: var(--main-color);
+  color: white;
+  transition: background-color 0.3s ease;
+  margin-top: 1.5rem;
+}
+
+.submitButton:disabled {
+  background-color: #e0e0e0;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* 解答結果 */
+.resultCorrect,
+.resultIncorrect {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.resultCorrect {
+  border: 2px solid var(--correct-border);
+  background-color: var(--correct-bg);
+  color: var(--correct-text);
+}
+
+.resultIncorrect {
+  border: 2px solid var(--incorrect-border);
+  background-color: var(--incorrect-bg);
+  color: var(--incorrect-text);
+}
+
+/* 解説 */
+.explanationBox {
+  margin-top: 1.5rem;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+}
+
+.explanationBox label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.explanationBox p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-color);
+  margin: 0.5rem 0 0 0;
+  white-space: pre-wrap;
+  /* 改行を反映 */
+}
+
+/* --- タグ --- */
+.tagsArea {
+  margin-top: 2rem;
+}
+
+.tagsArea label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.tagsContainer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 0.8rem;
+  background-color: #e0e0e0;
+  color: var(--text-color);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* --- インタラクション --- */
+.interactions {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.interactions button,
+.reportLink {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #777;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.interactions button:hover,
+.reportLink:hover {
+  background-color: #f0f0f0;
+}
+
+.interactions img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: invert(39%) sepia(8%) saturate(1030%) hue-rotate(176deg) brightness(94%) contrast(88%);
+}
+
+/* --- フッター（スマホ用） --- */
+.mobileFooter {
+  display: none;
+  /* PC・タブレット(横)では非表示 */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-around;
+  padding: 0.5rem 0;
+  z-index: 1000;
+}
+
+/* ... (フッタースタイルは Home.module.css と同様) ... */
+.mobileNavButton,
+.mobileNavButtonActive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  border: none;
+  background: none;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  flex: 1;
+  text-decoration: none;
+}
+
+.mobileNavButton {
+  color: var(--text-light);
+}
+
+.mobileNavButtonActive {
+  color: var(--main-color);
+}
+
+.navIconMobile {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+  object-fit: contain;
+}
+
+.navIconInactiveMobile {
+  filter: invert(39%) sepia(8%) saturate(1030%) hue-rotate(176deg) brightness(94%) contrast(88%);
+}
+
+.createButton {
+  background-color: var(--main-color);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -20px;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+  border: 3px solid white;
+}
+
+.navIconPlus {
+  filter: brightness(0) invert(1);
+  width: 28px;
+  height: 28px;
+}
+
+/* --- ★★★ レスポンシブ対応 ★★★ --- */
+@media (max-width: 1024px) {
+
+  /* タブレットではサイドバーを細くする */
+  .header {
+    width: 80px;
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+  }
+
+  .logo h1 {
+    display: none;
+  }
+
+  .navButton span,
+  .navButtonActive span {
+    display: none;
+  }
+
+  .navButton,
+  .navButtonActive {
+    justify-content: center;
+  }
+
+  .mainContainer {
+    margin-left: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* スマホではサイドバーを非表示 */
+  .header {
+    display: none;
+  }
+
+  .mainContainer {
+    margin-left: 0;
+    padding: 0;
+    /* スマホではパディングをなくす */
+    padding-bottom: 80px;
+  }
+
+  .pageTitle {
+    padding: 0 1rem;
+    /* 戻るボタン用のパディング */
+  }
+
+  .contentCard {
+    /* スマホではカードスタイルを解除 */
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background-image: none;
+    background-color: var(--bg-color);
+    /* ページ背景に合わせる */
+  }
+
+  .cardBody {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .content {
+    font-size: 0.95rem;
+  }
+
+  /* フッターを表示 */
+  .mobileFooter {
+    display: flex;
+  }
+}

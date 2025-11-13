@@ -85,6 +85,71 @@ export const getMe = async (token: string): Promise<User> => {
   return handleResponse(response);
 };
 
+/**
+ * 【生徒用】自身の学習統計を取得する
+ * @param token - 認証トークン
+ * @returns {Promise<UserStats>} - 学習統計
+ */
+export const getUserStats = async (token: string): Promise<UserStats> => {
+  const response = await fetch(`${API_BASE_URL}/users/me/statistics`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】自身の投稿履歴を取得する
+ * @param token - 認証トークン
+ * @returns {Promise<ContentInfo[]>} - 投稿コンテンツの配列
+ */
+export const getMyPosts = async (token: string): Promise<ContentInfo[]> => {
+  const response = await fetch(`${API_BASE_URL}/users/me/posts`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】自身の解答履歴を取得する
+ * @param token - 認証トークン
+ * @returns {Promise<UserAnswer[]>} - 解答履歴の配列
+ */
+export const getMyAnswers = async (token: string): Promise<UserAnswer[]> => {
+  const response = await fetch(`${API_BASE_URL}/users/me/answers`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】自身がいいねしたコンテンツ一覧を取得する
+ * @param token - 認証トークン
+ * @returns {Promise<ContentInfo[]>} - いいねしたコンテンツの配列
+ */
+export const getMyLikes = async (token: string): Promise<ContentInfo[]> => {
+  const response = await fetch(`${API_BASE_URL}/users/me/likes`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】自身の指摘履歴を取得する
+ * @param token - 認証トークン
+ * @returns {Promise<ReportDetails[]>} - 指摘履歴の配列
+ */
+export const getMyReports = async (token: string): Promise<ReportDetails[]> => {
+  const response = await fetch(`${API_BASE_URL}/reports/me`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
 // ---------------------------------------------------------------------------
 // チーム API
 // ---------------------------------------------------------------------------
@@ -151,6 +216,104 @@ export const getQuizzes = async (): Promise<Quiz[]> => {
   const response = await fetch(`${API_BASE_URL}/quizzes`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】新規クイズを作成する
+ * @param token - 認証トークン
+ * @param quizData - 新規クイズデータ
+ * @returns {Promise<Quiz>} - 作成されたクイズ
+ */
+export const createQuiz = async (token: string, quizData: QuizCreate): Promise<Quiz> => {
+  const response = await fetch(`${API_BASE_URL}/quizzes`, {
+    method: 'POST',
+    headers: getAuthHeaders(token),
+    body: JSON.stringify(quizData),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】新規豆知識を作成する
+ * @param token - 認証トークン
+ * @param triviaData - 新規豆知識データ
+ * @returns {Promise<Trivia>} - 作成された豆知識
+ */
+export const createTrivia = async (token: string, triviaData: TriviaCreate): Promise<Trivia> => {
+  const response = await fetch(`${API_BASE_URL}/facts`, {
+    method: 'POST',
+    headers: getAuthHeaders(token),
+    body: JSON.stringify(triviaData),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【共通】単一のクイズの詳細を取得する
+ * @param quizId - クイズID
+ * @returns {Promise<Quiz>} - クイズ詳細
+ */
+export const getQuizDetail = async (quizId: string): Promise<Quiz> => {
+  const response = await fetch(`${API_BASE_URL}/quizzes/${quizId}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【共通】単一の豆知識の詳細を取得する
+ * @param triviaId - 豆知識ID
+ * @returns {Promise<Trivia>} - 豆知識詳細
+ */
+export const getTriviaDetail = async (triviaId: string): Promise<Trivia> => {
+  const response = await fetch(`${API_BASE_URL}/facts/${triviaId}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return handleResponse(response);
+};
+
+
+
+/**
+ * 【共通】単一のコンテンツ（クイズまたは豆知識）の詳細を取得する
+ * @param contentId - コンテンツID
+ * @returns {Promise<Quiz | Trivia>} - コンテンツ詳細
+ */
+export const getContentDetail = async (contentId: string): Promise<Quiz | Trivia> => {
+  // バックエンドに GET /quizzes/{id} と GET /facts/{id} があると想定
+  // ここでは両方を取得する共通エンドポイント /content/{id} を仮定
+  // もし個別の場合は、呼び出し側で content_type を見て判断
+
+  // ★ 仮実装: /quizzes/{id} を使う (豆知識の場合は /facts/{id} が必要)
+  // TODO: バックエンドのAPI仕様に基づき、/quizzes または /facts を呼び分ける
+  const response = await fetch(`${API_BASE_URL}/quizzes/${contentId}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  // 豆知識だった場合
+  // const response = await fetch(`${API_BASE_URL}/facts/${contentId}`, ...);
+
+  return handleResponse(response);
+};
+
+/**
+ * 【生徒用】クイズに解答する
+ * @param token - 認証トークン
+ * @param quizId - クイズID
+ * @param optionId - 選択した選択肢ID
+ * @returns {Promise<AnswerResponse>} - 正誤判定と解説
+ */
+export const submitQuizAnswer = async (token: string, quizId: string, optionId: string): Promise<AnswerResponse> => {
+  const body: AnswerCreate = { selected_option_id: optionId };
+
+  const response = await fetch(`${API_BASE_URL}/quizzes/${quizId}/answer`, {
+    method: 'POST',
+    headers: getAuthHeaders(token),
+    body: JSON.stringify(body),
   });
   return handleResponse(response);
 };
@@ -236,3 +399,18 @@ export const getStudentDetails = async (token: string, studentId: string): Promi
   });
   return handleResponse(response);
 };
+/**
+ * 【生徒用】コンテンツへの指摘を投稿する
+ * @param token - 認証トークン
+ * @param reportData - 指摘内容
+ * @returns {Promise<ReportDetails>} - 作成された指摘情報
+ */
+export const createReport = async (token: string, reportData: ReportCreate): Promise<ReportDetails> => {
+  const response = await fetch(`${API_BASE_URL}/reports/`, { // POST /reports/
+    method: 'POST',
+    headers: getAuthHeaders(token),
+    body: JSON.stringify(reportData),
+  });
+  return handleResponse(response);
+};
+

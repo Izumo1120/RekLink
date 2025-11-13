@@ -1,0 +1,159 @@
+/* src/components/features/quiz/QuizCard.module.css */
+
+.card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+}
+
+.cardHeader {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contentType {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  color: #fff;
+}
+
+.quizBadge {
+  background-color: #2E7D32;
+  /* メイン（緑） */
+}
+
+.triviaBadge {
+  background-color: #546E7A;
+  /* 豆知識用の別色（例：グレー） */
+}
+
+.authorName {
+  font-size: 0.85rem;
+  color: #777;
+  margin-left: auto;
+  /* 右寄せ */
+}
+
+.cardBody {
+  padding: 1rem 1rem;
+  flex-grow: 1;
+  /* カードの高さを揃えるため */
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.content {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0;
+  line-height: 1.6;
+  /* 3行までに制限し、超えたら ... で省略 */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  /* 標準プロパティ */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 4.05em;
+  /* 3行分の高さを確保 (0.9rem * 1.6 * 3) */
+}
+
+.cardFooter {
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.tagsContainer {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  flex: 1;
+  /* ボタンにスペースを譲る */
+}
+
+.tag {
+  font-size: 0.75rem;
+  background-color: #F8F9FA;
+  /* ベース（オフホワイト） */
+  color: #555;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tag:hover {
+  background-color: #e0e0e0;
+}
+
+.actionButton {
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #2E7D32;
+  color: white;
+  transition: background-color 0.3s ease;
+  padding: 0.6rem 1.25rem;
+  margin-left: 1rem;
+  /* タグとの間隔 */
+}
+
+.actionButton:hover {
+  background-color: #1b5e20;
+}
+
+.interactions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.75rem 1rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.interactions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #777;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.interactions button:hover {
+  background-color: #f0f0f0;
+}

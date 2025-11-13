@@ -89,6 +89,14 @@ interface Tag {
 }
 
 /**
+ * クイズ選択肢（作成用）のスキーマ (schemas/content.py の QuizOptionCreate に対応)
+ */
+interface QuizOptionCreate {
+  option_text: string;
+  is_correct: boolean;
+}
+
+/**
  * クイズ選択肢のスキーマ (schemas/content.py の QuizOption に対応)
  */
 interface QuizOption {
@@ -115,6 +123,17 @@ interface Quiz {
 }
 
 /**
+ * クイズ作成用のスキーマ (schemas/content.py の QuizCreate に対応)
+ */
+interface QuizCreate {
+  title: string;
+  content: string;
+  explanation?: string | null;
+  options: QuizOptionCreate[]; // QuizOption[] から QuizOptionCreate[] に変更
+  tags?: string[] | null;
+}
+
+/**
  * 豆知識のスキーマ (schemas/content.py の Trivia に対応)
  */
 interface Trivia {
@@ -129,6 +148,15 @@ interface Trivia {
   tags: Tag[];
 }
 
+/**
+ * 豆知識作成用のスキーマ (schemas/content.py の TriviaCreate に対応)
+ */
+interface TriviaCreate {
+  title: string;
+  content: string;
+  explanation?: string | null;
+  tags?: string[] | null;
+}
 /**
  * ダッシュボードサマリーのスキーマ (schemas/dashboard.py の DashboardSummary に対応)
  */
@@ -152,7 +180,7 @@ interface PopularTag {
 /**
  * 指摘カテゴリの型
  */
-type ReportCategory = 'major_error' | 'minor_error' | 'improvement';
+type ReportCategory = 'major_error' | 'minor_error' | 'improvement' | 'other';
 /**
  * 指摘ステータスの型
  */
@@ -271,4 +299,27 @@ interface StudentDetails {
   stats: UserStats;
   recent_posts: ContentInfo[];
   recent_answers: UserAnswer[];
+}
+/**
+ * クイズ解答 送信用スキーマ (AnswerCreate)
+ */
+interface AnswerCreate {
+  selected_option_id: string; // UUID
+}
+
+/**
+ * クイズ解答 レスポンススキーマ (AnswerResponse)
+ */
+interface AnswerResponse {
+  is_correct: boolean;
+  correct_option_id: string; // UUID
+  explanation: string | null;
+}
+/**
+ * 指摘（レポート）作成用のスキーマ (schemas/report.py の ReportCreate に対応)
+ */
+interface ReportCreate {
+  content_id: string; // UUID
+  category: ReportCategory;
+  description: string;
 }

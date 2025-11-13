@@ -1,0 +1,515 @@
+/* src/pages/student/MyPage/MyPage.module.css */
+
+/* --- カラーパレット --- */
+:root {
+  --main-color: #2E7D32;
+  --bg-color: #F8F9FA;
+  --card-bg: #FFFFFF;
+  --text-color: #343A40;
+  --text-light: #616161;
+  --border-color: #e0e0e0;
+  --correct-color: #2E7D32;
+  --correct-bg: #e8f5e9;
+  --incorrect-color: #D32F2F;
+  --incorrect-bg: #ffebee;
+}
+
+/* --- ホーム画面から流用する共通レイアウト --- */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+.loadingScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: #666;
+  background-color: var(--bg-color);
+}
+
+.header {
+  width: 260px;
+  background-color: var(--card-bg);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo img {
+  width: 32px;
+  height: 32px;
+}
+
+.logo h1 {
+  font-size: 1.25rem;
+  color: var(--main-color);
+  margin: 0;
+  font-weight: 600;
+}
+
+.headerNav {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.navButton,
+.navButtonActive {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.navButton {
+  color: var(--text-light);
+}
+
+.navButton:hover {
+  background-color: var(--bg-color);
+}
+
+.navButtonActive {
+  background-color: var(--main-color);
+  color: white;
+}
+
+.navIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.navIconInactive {
+  filter: invert(39%) sepia(8%) saturate(1030%) hue-rotate(176deg) brightness(94%) contrast(88%);
+}
+
+.navButtonActive .navIcon {
+  filter: brightness(0) invert(1);
+}
+
+/* --- メインコンテンツ --- */
+.mainContainer {
+  flex: 1;
+  padding: 2rem;
+  margin-left: 260px;
+  padding-bottom: 80px;
+  max-width: 800px;
+  margin-right: auto;
+}
+
+.pageTitle {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-color);
+}
+
+.pageTitle svg {
+  width: 28px;
+  height: 28px;
+}
+
+.pageTitle h2 {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+/* --- プロフィールカード --- */
+.profileCard {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border-color);
+  padding: 2rem;
+  background-image: linear-gradient(180deg, rgba(215, 204, 200, 0.2) 0%, rgba(215, 204, 200, 0.0) 25%);
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.profileInitial {
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  border-radius: 50%;
+  background-color: var(--main-color);
+  color: white;
+  font-weight: 600;
+  font-size: 1.5rem;
+  text-align: center;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profileInfo {
+  flex-grow: 1;
+}
+
+.profileName {
+  font-weight: 600;
+  font-size: 1.5rem;
+  display: block;
+}
+
+.profileRole {
+  font-size: 1rem;
+  color: var(--text-light);
+}
+
+/* --- サマリーグリッド --- */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summaryCard {
+  background-color: var(--bg-color);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.cardValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--main-color);
+  line-height: 1.2;
+}
+
+.summaryCard label {
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+/* --- タブ切り替え --- */
+.tabContainer {
+  margin-bottom: 1.5rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #e0e0e0;
+  padding: 0.3rem;
+  border-radius: 8px;
+}
+
+.tabButton,
+.tabActive {
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  /* 均等割り付け */
+}
+
+.tabButton {
+  background-color: transparent;
+  color: var(--text-light);
+}
+
+.tabButton:hover {
+  background-color: #f0f0f0;
+}
+
+.tabActive {
+  background-color: var(--card-bg);
+  color: var(--main-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* --- タブコンテンツ --- */
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--bg-color);
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.itemInfo {
+  flex-grow: 1;
+}
+
+.itemTitle {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.itemInfo p {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin: 0.25rem 0 0 0;
+  /* 1行に省略 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemInfo small {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.quizBadge {
+  color: var(--main-color);
+  background-color: var(--correct-bg);
+}
+
+.triviaBadge {
+  color: #546E7A;
+  background-color: #eceff1;
+}
+
+.detailButton {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--main-color);
+  background: none;
+  border: 1px solid var(--main-color);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.answerIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.correct {
+  background-color: var(--correct-bg);
+  color: var(--correct-color);
+}
+
+.incorrect {
+  background-color: var(--incorrect-bg);
+  color: var(--incorrect-color);
+}
+
+.correctBadge {
+  color: var(--correct-color);
+  background-color: var(--correct-bg);
+}
+
+.incorrectBadge {
+  color: var(--incorrect-color);
+  background-color: var(--incorrect-bg);
+}
+
+.pending {
+  /* 指摘用 */
+  color: #c65302;
+  background-color: #fff3e0;
+}
+
+.resolved,
+.rejected {
+  color: var(--text-light);
+  background-color: #eee;
+}
+
+
+/* --- フッター（スマホ用） --- */
+.mobileFooter {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-around;
+  padding: 0.5rem 0;
+  z-index: 1000;
+}
+
+/* ... (フッタースタイルは Home.module.css と同様) ... */
+.mobileNavButton,
+.mobileNavButtonActive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  border: none;
+  background: none;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  flex: 1;
+  text-decoration: none;
+}
+
+.mobileNavButton {
+  color: var(--text-light);
+}
+
+.mobileNavButtonActive {
+  color: var(--main-color);
+}
+
+.navIconMobile {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+  object-fit: contain;
+}
+
+.navIconInactiveMobile {
+  filter: invert(39%) sepia(8%) saturate(1030%) hue-rotate(176deg) brightness(94%) contrast(88%);
+}
+
+.createButton {
+  background-color: var(--main-color);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -20px;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+  border: 3px solid white;
+}
+
+.navIconPlus {
+  filter: brightness(0) invert(1);
+  width: 28px;
+  height: 28px;
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 1024px) {
+  .header {
+    width: 80px;
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+  }
+
+  .logo h1 {
+    display: none;
+  }
+
+  .navButton span,
+  .navButtonActive span {
+    display: none;
+  }
+
+  .navButton,
+  .navButtonActive {
+    justify-content: center;
+  }
+
+  .mainContainer {
+    margin-left: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    display: none;
+  }
+
+  .mainContainer {
+    margin-left: 0;
+    padding: 1rem;
+    padding-bottom: 80px;
+  }
+
+  .mobileFooter {
+    display: flex;
+  }
+
+  .pageTitle {
+    padding: 0 0.5rem;
+    /* スマホ用に微調整 */
+  }
+
+  .profileCard {
+    padding: 1.5rem;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr 1fr;
+    /* 2x2 に */
+  }
+
+  .cardValue {
+    font-size: 1.5rem;
+  }
+
+  .tabs {
+    gap: 0.25rem;
+    padding: 0.25rem;
+  }
+
+  .tabButton,
+  .tabActive {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.85rem;
+  }
+}

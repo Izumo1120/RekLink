@@ -1,19 +1,30 @@
 "use client";
 
 import { useState, useEffect, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import styles from './Home.module.css';
 
 // APIクライアントとストアをインポート
 import { getStudentTeam, joinTeam, getFeed } from '@lib/api';
 import { useUserStore } from '@store/userStore';
 
+// ★★★ 新規インポート ★★★
+// ホーム画面でフィードを表示するためのカードコンポーネント
+import QuizCard from '@components/features/quiz/QuizCard.tsx';
+
+// フッターナビゲーション用のアイコン
+import iconHome from '@assets/icons/icon-dashboard-active.png'; // 緑色の家
+import iconBook from '@assets/icons/note-1.png';
+import iconUser from '@assets/icons/people-1.png';
+// ★ TODO: 'plus' アイコンを src/assets/icons/icon-plus.png として保存してください
+import iconPlus from '@assets/icons/icon-plus.png';
+import logoBook from '@assets/icons/note-1.png';
+
 const Home = () => {
   const navigate = useNavigate();
 
-  // --- 1. 認証状態の取得 (Zustandの修正) ---
-  // ★★★ 修正 ★★★
-  // getSnapshotの警告を解消するため、セレクタを個別に分割します
+  // --- 1. 認証状態の取得 ---
+  // getSnapshotの警告と無限ループを避けるため、セレクタを個別に分割
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.token);
   const isAuthenticated = useUserStore((state) => state.isAuthenticated());
@@ -32,7 +43,7 @@ const Home = () => {
     }
     // 2b. 役割ガード (生徒ではない)
     if (user.role !== 'student') {
-      navigate('/teacher/dashboard'); // 仮の教師用ダッシュボードパス
+      navigate('/teacher/dashboard'); // 教師はダッシュボードへ
       return;
     }
 
@@ -59,9 +70,8 @@ const Home = () => {
       }
     };
 
-    // ★★★ 修正 ★★★
-    // 無限ループを解消するため、statusが 'checking' の時のみ
-    // API呼び出しを実行するようにガードします
+    // ★★★ 無限ループ修正 ★★★
+    // statusが 'checking' の時のみ API呼び出しを実行するようにガードします
     if (status === 'checking') {
       fetchData();
     }
@@ -149,26 +159,82 @@ const Home = () => {
   // 4. 準備完了（フィードを表示）
   return (
     <div className={styles.homeContainer}>
-      {/* TODO: ヘッダーやナビゲーションバーをここに配置 */}
+
+      {/* --- ヘッダー（PC・タブレット用）--- */}
       <header className={styles.header}>
-        <h1>ホーム</h1>
-        {/* TODO: 検索バーやマイページへのリンク */}
+        <div className={styles.logo}>
+          <img src={logoBook} alt="RekLink Logo" />
+          <h1>RekLink Learning</h1>
+        </div>
+        <nav className={styles.headerNav}>
+          <button className={styles.navButtonActive}>
+            <img src={iconHome} alt="" className={styles.navIcon} />
+            <span>ホーム</span>
+          </button>
+          <Link to="/mypage" className={styles.navButton}> {/* TODO: /mypage */}
+            <img src={iconUser} alt="" className={`${styles.navIcon} ${styles.navIconInactive}`} />
+            <span>マイページ</span>
+          </Link>
+          <Link to="/create" className={styles.navButton}> {/* TODO: /create */}
+            <img src={iconPlus} alt="" className={`${styles.navIcon} ${styles.navIconInactive}`} />
+            <span>投稿作成</span>
+          </Link>
+          {/* TODO: ログアウト機能 */}
+        </nav>
       </header>
 
-      <main className={styles.feedList}>
-        {feedItems.length === 0 ? (
-          <p>表示するコンテンツがまだありません。</p>
-        ) : (
-          feedItems.map((item) => (
-            // TODO: ここを QuizCard コンポーネントに差し替える
-            <div key={item.id} className={styles.quizCardDummy}>
-              <h3>{item.title}</h3>
-              <p>({item.content_type === 'quiz' ? 'クイズ' : '豆知識'})</p>
+      {/* --- メインコンテンツ --- */}
+      <main className={styles.mainContent}>
+
+        {/* --- タブ切り替え --- */}
+        <div className={styles.tabContainer}>
+          <div className={styles.tabs}>
+            <button className={styles.tabActive}>おすすめ</button>
+            <button className={styles.tabButton}>保存済み</button>
+          </div>
+          <button className={styles.refreshButton}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.66699 10C1.66699 14.6025 5.39783 18.3334 10.0003 18.3334C14.6028 18.3334 18.3337 14.6025 18.3337 10C18.3337 5.39752 14.6028 1.66669 10.0003 1.66669C7.8872 1.66669 5.96131 2.47231 4.50033 3.82504M4.50033 3.82504V1.66669M4.50033 3.82504H6.66699" stroke="#2E7D32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <span>更新</span>
+          </button>
+        </div>
+
+        {/* --- フィード一覧 --- */}
+        <div className={styles.feedList}>
+          {feedItems.length === 0 ? (
+            <div className={styles.emptyFeed}>
+              <img src={iconBook} alt="コンテンツなし" />
+              <p>保存したコンテンツはありません</p>
             </div>
-          ))
-        )}
+          ) : (
+            feedItems.map((item) => (
+              // ★★★ QuizCard コンポーネントを使用 ★★★
+              <QuizCard key={item.id} item={item} />
+            ))
+          )}
+        </div>
       </main>
-      {/* TODO: フッターやコンテンツ作成ボタン(+)をここに配置 */}
+
+      {/* --- フッター（スマホ用） --- */}
+      <footer className={styles.mobileFooter}>
+        <button className={styles.mobileNavButtonActive}>
+          <img src={iconHome} alt="" className={styles.navIconMobile} />
+          <span>ホーム</span>
+        </button>
+        <Link to="/quizzes" className={styles.mobileNavButton}> {/* TODO: /quizzes or /search */}
+          <img src={iconBook} alt="" className={`${styles.navIconMobile} ${styles.navIconInactiveMobile}`} />
+          <span>学習</span>
+        </Link>
+        <Link to="/create" className={styles.mobileNavButton}>
+          <div className={styles.createButton}>
+            <img src={iconPlus} alt="" className={`${styles.navIconMobile} ${styles.navIconPlus}`} />
+          </div>
+          <span>投稿</span>
+        </Link>
+        <Link to="/mypage" className={styles.mobileNavButton}>
+          <img src={iconUser} alt="" className={`${styles.navIconMobile} ${styles.navIconInactiveMobile}`} />
+          <span>マイページ</span>
+        </Link>
+      </footer>
     </div>
   );
 };
