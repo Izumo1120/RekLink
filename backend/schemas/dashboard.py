@@ -41,3 +41,15 @@ class StudentDashboardDetails(BaseModel):
     stats: user_schema.UserStats
     recent_posts: List[content_schema.ContentInfo]
     recent_answers: List[content_schema.UserAnswer]
+
+
+class WeeklyActivity(BaseModel):
+    """
+    【教師用】週間活動データ
+    """
+    date: str = Field(..., description="日付 (YYYY-MM-DD)")
+    posts: int = Field(..., description="投稿数")
+    answers: int = Field(..., description="解答数")
+
+    class Config:
+        from_attributes = True

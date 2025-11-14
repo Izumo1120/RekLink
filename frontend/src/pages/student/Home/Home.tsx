@@ -12,12 +12,13 @@ import { useUserStore } from '@store/userStore';
 // ホーム画面でフィードを表示するためのカードコンポーネント
 import QuizCard from '@components/features/quiz/QuizCard.tsx';
 
-// フッターナビゲーション用のアイコン
-import iconHome from '@assets/icons/icon-dashboard-active.png'; // 緑色の家
+// ヘッダー・フッターナビゲーション用のアイコン
+import iconHomeActive from '@assets/icons/icon-dashboard-active.png'; // 緑色の家（アクティブ）
+import iconHomeInactive from '@assets/icons/icon-dashboard-inactive.png'; // グレーの家（非アクティブ）
 import iconBook from '@assets/icons/note-1.png';
 import iconUser from '@assets/icons/people-1.png';
-// ★ TODO: 'plus' アイコンを src/assets/icons/icon-plus.png として保存してください
 import iconPlus from '@assets/icons/icon-plus.png';
+import iconLogout from '@assets/icons/icon-logout.png';
 import logoBook from '@assets/icons/note-1.png';
 
 type TabType = 'recommended' | 'saved';
@@ -30,6 +31,7 @@ const Home = () => {
   const user = useUserStore((state) => state.user);
   const token = useUserStore((state) => state.token);
   const isAuthenticated = useUserStore((state) => state.isAuthenticated());
+  const logout = useUserStore((state) => state.logout);
 
   // --- 画面の状態管理 ---
   const [status, setStatus] = useState<'checking' | 'joining' | 'ready' | 'error'>('checking');
@@ -202,9 +204,14 @@ const Home = () => {
     );
   }
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   // 4. 準備完了（フィードを表示）
   return (
-    <div className={styles.homeContainer}>
+    <div className={styles.layout}>
 
       {/* --- ヘッダー（PC・タブレット用）--- */}
       <header className={styles.header}>
@@ -214,23 +221,30 @@ const Home = () => {
         </div>
         <nav className={styles.headerNav}>
           <button className={styles.navButtonActive}>
-            <img src={iconHome} alt="" className={styles.navIcon} />
+            <img src={iconHomeActive} alt="" className={styles.navIcon} />
             <span>ホーム</span>
           </button>
-          <Link to="/mypage" className={styles.navButton}> {/* TODO: /mypage */}
-            <img src={iconUser} alt="" className={`${styles.navIcon} ${styles.navIconInactive}`} />
-            <span>マイページ</span>
+          <Link to="/home" className={styles.navButton}>
+            <img src={iconBook} alt="" className={`${styles.navIcon} ${styles.navIconInactive}`} />
+            <span>学習コンテンツ</span>
           </Link>
-          <Link to="/create" className={styles.navButton}> {/* TODO: /create */}
+          <Link to="/create" className={styles.navButton}>
             <img src={iconPlus} alt="" className={`${styles.navIcon} ${styles.navIconInactive}`} />
             <span>投稿作成</span>
           </Link>
-          {/* TODO: ログアウト機能 */}
+          <Link to="/mypage" className={styles.navButton}>
+            <img src={iconUser} alt="" className={`${styles.navIcon} ${styles.navIconInactive}`} />
+            <span>マイページ</span>
+          </Link>
+          <button onClick={handleLogout} className={styles.navButton}>
+            <img src={iconLogout} alt="" className={`${styles.navIcon} ${styles.navIconInactive}`} />
+            <span>ログアウト</span>
+          </button>
         </nav>
       </header>
 
       {/* --- メインコンテンツ --- */}
-      <main className={styles.mainContent}>
+      <main className={styles.mainContainer}>
 
         {/* --- タブ切り替え --- */}
         <div className={styles.tabContainer}>
@@ -275,10 +289,10 @@ const Home = () => {
       {/* --- フッター（スマホ用） --- */}
       <footer className={styles.mobileFooter}>
         <button className={styles.mobileNavButtonActive}>
-          <img src={iconHome} alt="" className={styles.navIconMobile} />
+          <img src={iconHomeActive} alt="" className={styles.navIconMobile} />
           <span>ホーム</span>
         </button>
-        <Link to="/quizzes" className={styles.mobileNavButton}> {/* TODO: /quizzes or /search */}
+        <Link to="/home" className={styles.mobileNavButton}>
           <img src={iconBook} alt="" className={`${styles.navIconMobile} ${styles.navIconInactiveMobile}`} />
           <span>学習</span>
         </Link>

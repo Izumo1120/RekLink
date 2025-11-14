@@ -126,7 +126,82 @@ async def get_popular_tags(
     """
     
     popular_tags_records = await conn.fetch(query, *params)
-    
+
     # ★★★ 修正 ★★★: Recordのリストをdictのリストに変換
     return [dict(tag) for tag in popular_tags_records]
+
+
+@router.get(
+    "/weekly-activity",
+    response_model=List[dashboard_schema.WeeklyActivity],
+    summary="【教師用】週間活動推移データを取得"
+)
+async def get_weekly_activity(
+    conn: asyncpg.Connection = Depends(deps.get_db),
+    current_teacher: user_schema.User = Depends(get_current_teacher),
+    team_id: Optional[uuid.UUID] = None,
+    days: int = 7  # デフォルトで7日分
+):
+    """
+    自身が管理するチームの生徒の週間活動推移（投稿数・解答数）を取得します。（教師権限が必要）
+    """
+
+    # 1. 対象となる生徒のIDリストを取得
+    student_ids_query = """
+        SELECT tm.user_id FROM team_members tm
+        JOIN teams t ON tm.team_id = t.id
+        WHERE t.created_by = $1
+    """
+    params = [current_teacher.id]
+
+    if team_id:
+        # 特定のチームが指定された場合、そのチームの所有者かも確認
+        is_owner = await conn.fetchval(
+            "SELECT 1 FROM teams WHERE id = $1 AND created_by = $2",
+            team_id, current_teacher.id
+        )
+        if not is_owner:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found or you are not the owner")
+        student_ids_query += " AND t.id = $2"
+        params.append(team_id)
+
+    student_records = await conn.fetch(student_ids_query, *params)
+    student_ids = [s['user_id'] for s in student_records]
+
+    if not student_ids:
+        # 生徒がいない場合は空の配列を返す
+        return []
+
+    # 2. 過去N日間の投稿数と解答数を集計
+    query = """
+        WITH date_series AS (
+            SELECT (CURRENT_DATE - generate_series(0, $1 - 1))::date AS date
+        ),
+        daily_posts AS (
+            SELECT DATE(created_at) AS date, COUNT(*) AS posts
+            FROM contents
+            WHERE author_id = ANY($2)
+              AND created_at >= CURRENT_DATE - INTERVAL '1 day' * $1
+            GROUP BY DATE(created_at)
+        ),
+        daily_answers AS (
+            SELECT DATE(answered_at) AS date, COUNT(*) AS answers
+            FROM user_answers
+            WHERE user_id = ANY($2)
+              AND answered_at >= CURRENT_DATE - INTERVAL '1 day' * $1
+            GROUP BY DATE(answered_at)
+        )
+        SELECT
+            ds.date::text AS date,
+            COALESCE(dp.posts, 0) AS posts,
+            COALESCE(da.answers, 0) AS answers
+        FROM date_series ds
+        LEFT JOIN daily_posts dp ON ds.date = dp.date
+        LEFT JOIN daily_answers da ON ds.date = da.date
+        ORDER BY ds.date ASC
+    """
+
+    activity_records = await conn.fetch(query, days, student_ids)
+
+    return [dict(record) for record in activity_records]
 

@@ -346,6 +346,26 @@ export const getPopularTags = async (token: string, teamId?: string): Promise<Po
   return handleResponse(response);
 };
 
+/**
+ * 【教師用】週間活動推移データを取得する
+ * @param token - 認証トークン
+ * @param teamId - チームID（オプション）
+ * @param days - 取得する日数（デフォルト: 7）
+ * @returns {Promise<WeeklyActivity[]>}
+ */
+export const getWeeklyActivity = async (token: string, teamId?: string, days: number = 7): Promise<WeeklyActivity[]> => {
+  const url = new URL(`${API_BASE_URL}/dashboard/weekly-activity`);
+  if (teamId) {
+    url.searchParams.append('team_id', teamId);
+  }
+  url.searchParams.append('days', days.toString());
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+  return handleResponse(response);
+};
+
 // ---------------------------------------------------------------------------
 // 指摘管理 API
 // ---------------------------------------------------------------------------

@@ -7,7 +7,10 @@ import styles from './Dashboard.module.css';
 
 // ストアとAPIクライアント
 import { useUserStore } from '@store/userStore';
-import { getDashboardSummary, getPopularTags } from '@lib/api';
+import { getDashboardSummary, getPopularTags, getWeeklyActivity } from '@lib/api';
+
+// Rechartsのインポート
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // --- アイコンのアセット ---
 // (src/assets/icons/ に指定の名前で保存されていることを想定)
@@ -27,23 +30,7 @@ import iconFlag from '@assets/icons/achieve-2.png'; // 指摘管理 (lucide: Fla
 // iconDashboardInactive は未使用のため削除
 
 
-// --- チャート用のダミーデータ ---
-const dummyWeeklyActivity = [
-  { name: '10/25', posts: 12, answers: 45 },
-  { name: '10/26', posts: 15, answers: 52 },
-  { name: '10/27', posts: 10, answers: 38 },
-  { name: '10/28', posts: 18, answers: 50 },
-  { name: '10/29', posts: 14, answers: 60 },
-  { name: '10/30', posts: 20, answers: 70 },
-  { name: '10/31', posts: 16, answers: 55 },
-];
-
-const dummyActiveStudents = [
-  { id: '1', name: '学習 太郎', posts: 12, answers: 45, accuracy: 92 },
-  { id: '2', name: '知識 花子', posts: 10, answers: 38, accuracy: 88 },
-  { id: '3', name: '探究 次郎', posts: 8, answers: 35, accuracy: 85 },
-];
-// ---
+// ダミーデータは削除しました
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -59,6 +46,7 @@ const Dashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [popularTags, setPopularTags] = useState<PopularTag[]>([]);
+  const [weeklyActivity, setWeeklyActivity] = useState<WeeklyActivity[]>([]);
 
   // --- 認証ガード & データ取得 ---
   useEffect(() => {
@@ -78,12 +66,14 @@ const Dashboard = () => {
       try {
         setStatus('loading');
         // 4. APIを並行して呼び出す
-        const [summaryData, tagsData] = await Promise.all([
+        const [summaryData, tagsData, activityData] = await Promise.all([
           getDashboardSummary(token),
-          getPopularTags(token)
+          getPopularTags(token),
+          getWeeklyActivity(token)
         ]);
         setSummary(summaryData);
         setPopularTags(tagsData);
+        setWeeklyActivity(activityData);
         setStatus('ready');
       } catch (err: any) {
         setError(err.message || 'ダッシュボードの読み込みに失敗しました。');
@@ -215,50 +205,108 @@ const Dashboard = () => {
 
         {/* --- チャートエリア --- */}
         <section className={styles.chartsGrid}>
-          {/* 週間活動推移 (ダミー) */}
+          {/* 週間活動推移 (折れ線グラフ) */}
           <div className={styles.chartCard}>
             <h3>週間活動推移</h3>
-            <div className={styles.chartPlaceholder}>
-              <p>(ここにRechartsなどのグラフが表示されます)</p>
-              <pre>{JSON.stringify(dummyWeeklyActivity, null, 2)}</pre>
+            <div className={styles.chartContainer}>
+              {weeklyActivity.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={weeklyActivity.map(item => ({
+                    ...item,
+                    name: new Date(item.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })
+                  }))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+                    <XAxis
+                      dataKey="name"
+                      stroke="#666"
+                      style={{ fontSize: '12px' }}
+                    />
+                  <YAxis
+                    stroke="#666"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #E0E0E0',
+                      borderRadius: '4px'
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: '12px' }}
+                    iconType="line"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="posts"
+                    stroke="#2E7D32"
+                    strokeWidth={2}
+                    name="投稿数"
+                    dot={{ fill: '#2E7D32', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="answers"
+                    stroke="#1976D2"
+                    strokeWidth={2}
+                    name="解答数"
+                    dot={{ fill: '#1976D2', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+              ) : (
+                <p style={{ textAlign: 'center', color: '#999', padding: '40px' }}>活動データがありません。</p>
+              )}
             </div>
           </div>
-          {/* 科目別投稿数 (人気タグで代用) */}
+          {/* 科目別投稿数 (棒グラフ) */}
           <div className={styles.chartCard}>
             <h3>科目別投稿数 (人気タグ)</h3>
-            <div className={styles.chartPlaceholder}>
-              <p>(ここにRechartsなどのグラフが表示されます)</p>
-              <ul className={styles.tagList}>
-                {popularTags.length > 0 ? (
-                  popularTags.map((tag) => (
-                    <li key={tag.tag_id}>
-                      <span className={styles.tagName}>{tag.tag_name}</span>
-                      <span className={styles.tagCount}>{tag.usage_count}件</span>
-                    </li>
-                  ))
-                ) : <p>タグデータがありません。</p>}
-              </ul>
+            <div className={styles.chartContainer}>
+              {popularTags.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={popularTags.slice(0, 10)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+                    <XAxis
+                      dataKey="tag_name"
+                      stroke="#666"
+                      style={{ fontSize: '11px' }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                    />
+                    <YAxis
+                      stroke="#666"
+                      style={{ fontSize: '12px' }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #E0E0E0',
+                        borderRadius: '4px'
+                      }}
+                    />
+                    <Legend
+                      wrapperStyle={{ fontSize: '12px' }}
+                    />
+                    <Bar
+                      dataKey="usage_count"
+                      fill="#2E7D32"
+                      name="投稿数"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p style={{ textAlign: 'center', color: '#999', padding: '40px' }}>タグデータがありません。</p>
+              )}
             </div>
           </div>
         </section>
 
-        {/* --- アクティブな生徒 (ダミー) --- */}
-        <section className={styles.studentListCard}>
-          <h3>アクティブな生徒</h3>
-          <div className={styles.studentList}>
-            {dummyActiveStudents.map((student, index) => (
-              <div key={student.id} className={styles.studentItem}>
-                <div className={styles.studentRank}>{index + 1}</div>
-                <div className={styles.studentInfo}>
-                  <span className={styles.studentName}>{student.name}</span>
-                  <small>投稿: {student.posts} | 解答: {student.answers}</small>
-                </div>
-                <div className={styles.studentAccuracy}>{student.accuracy}%</div>
-                <span className={styles.studentLabel}>正答率</span>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* アクティブな生徒セクションは将来実装予定 */}
 
       </main>
 

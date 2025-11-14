@@ -178,6 +178,15 @@ interface PopularTag {
 }
 
 /**
+ * 週間活動データのスキーマ (schemas/dashboard.py の WeeklyActivity に対応)
+ */
+interface WeeklyActivity {
+  date: string; // YYYY-MM-DD
+  posts: number;
+  answers: number;
+}
+
+/**
  * 指摘カテゴリの型
  */
 type ReportCategory = 'major_error' | 'minor_error' | 'improvement' | 'other';
