@@ -1,0 +1,181 @@
+/* --- カラーパレット --- */
+:root {
+  --main-color: #2E7D32;
+  --bg-color: #F8F9FA;
+  --card-bg: #FFFFFF;
+  --text-color: #343A40;
+  --text-light: #616161;
+  --border-color: #e0e0e0;
+}
+
+/* --- 読み込み画面 --- */
+.loadingScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: #666;
+  background-color: var(--bg-color);
+}
+
+/* --- クイズコンテナ --- */
+.quizContainer {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  padding: 2rem;
+}
+
+/* --- ページヘッダー --- */
+.pageHeader {
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  text-align: center;
+}
+
+.pageHeader h1 {
+  font-size: 2rem;
+  color: var(--main-color);
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.pageHeader p {
+  font-size: 1rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* --- メインコンテンツ --- */
+.mainContent {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: var(--bg-color);
+}
+
+.tabContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #e0e0e0;
+  padding: 0.3rem;
+  border-radius: 8px;
+}
+
+.tabButton,
+.tabActive {
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tabButton {
+  background-color: transparent;
+  color: var(--text-light);
+}
+
+.tabButton:hover {
+  background-color: #f0f0f0;
+}
+
+.tabActive {
+  background-color: var(--card-bg);
+  color: var(--main-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.refreshButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--main-color);
+  cursor: pointer;
+  background-color: var(--card-bg);
+  transition: background-color 0.2s ease;
+}
+
+.refreshButton:hover {
+  background-color: #f9f9f9;
+}
+
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.feedList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.emptyFeed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text-light);
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.emptyFeed img {
+  width: 60px;
+  height: 60px;
+  filter: invert(70%) sepia(0%) saturate(546%) hue-rotate(193deg) brightness(91%) contrast(87%);
+  margin-bottom: 1rem;
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 768px) {
+  .quizContainer {
+    padding: 1rem;
+  }
+
+  .pageHeader h1 {
+    font-size: 1.5rem;
+  }
+
+  .pageHeader p {
+    font-size: 0.9rem;
+  }
+
+  .tabContainer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .tabs {
+    width: 100%;
+  }
+
+  .tabButton,
+  .tabActive {
+    flex: 1;
+  }
+
+  .refreshButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

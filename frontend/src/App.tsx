@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Landing from '@pages/common/Landing/Landing';
 import Login from '@pages/common/Login/Login';
 import Signup from '@pages/common/Signup/Signup';
-// import QuizFeed from '@pages/common/QuizFeed/QuizFeed';
+import Quiz from '@pages/common/Quiz/Quiz';
 import Home from '@pages/student/Home/Home';
 
 // ★★★ 修正 ★★★
@@ -35,7 +35,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
 
         {/* ログイン不要でアクセスできるクイズ一覧ページ */}
-        {/* <Route path="/quizzes" element={<QuizFeed />} /> */}
+        <Route path="/quiz" element={<Quiz />} />
 
 
         {/* --- ★★★ 修正 ★★★ (生徒向けルート) --- */}

@@ -58,9 +58,9 @@ const Landing = () => {
 
       {/* --- 機能紹介カードセクション --- */}
       <section className={styles.featuresSection}>
-        
-        {/* クイズと豆知識 ( /quizzes へリンク) */}
-        <Link to="/quizzes" className={`${styles.featureCard} ${styles.cardLink}`}>
+
+        {/* クイズと豆知識 ( /quiz へリンク) */}
+        <Link to="/quiz" className={`${styles.featureCard} ${styles.cardLink}`}>
           <div className={styles.cardIcon}>
             <img src={iconQuiz} alt="クイズと豆知識" />
           </div>

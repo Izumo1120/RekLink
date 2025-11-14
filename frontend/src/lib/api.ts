@@ -507,3 +507,36 @@ export const getSavedContents = async (token: string): Promise<(Quiz | Trivia)[]
   return handleResponse(response);
 };
 
+// ---------------------------------------------------------------------------
+// 公開API（認証不要）
+// ---------------------------------------------------------------------------
+
+/**
+ * 【公開】認証不要で公開フィードを取得
+ * 作成者情報は匿名化されます
+ */
+export const getPublicFeed = async (): Promise<(Quiz | Trivia)[]> => {
+  const response = await fetch(`${API_BASE_URL}/public/feed`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return handleResponse(response);
+};
+
+/**
+ * 【公開】認証不要でクイズに解答
+ * 解答履歴は保存されません
+ */
+export const submitPublicQuizAnswer = async (quizId: string, optionId: string): Promise<AnswerResponse> => {
+  const response = await fetch(`${API_BASE_URL}/public/quiz/${quizId}/answer`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ selected_option_id: optionId }),
+  });
+  return handleResponse(response);
+};
+
